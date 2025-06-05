@@ -418,7 +418,7 @@ export default function AleksPortfolio() {
           will-change: transform;
           margin-top: 42vh;
           padding: 0;
-          padding-bottom: 8vh;
+          padding-bottom: 12vh;
           max-height: none;
           overflow: visible;
           box-sizing: border-box;
@@ -438,8 +438,8 @@ export default function AleksPortfolio() {
         }
 
         .main-content.expanded-4 {
-          transform: translateY(-70vh);
-          padding-bottom: 15vh;
+          transform: translateY(-50vh);
+          padding-bottom: 25vh;
         }
 
         .desktop-text {
@@ -1450,8 +1450,8 @@ export default function AleksPortfolio() {
           visibility: hidden;
           width: 92vw;
           max-width: 32rem;
-          margin: 1.5rem auto 3rem auto;
-          padding: 1.5rem;
+          margin: 1.5rem auto 5rem auto;
+          padding: 1.8rem 1.2rem;
           background: rgba(255, 255, 255, 0.03);
           border: 1px solid rgba(255, 255, 255, 0.12);
           border-radius: 12px;
@@ -1610,6 +1610,19 @@ export default function AleksPortfolio() {
           .contact-form {
             max-width: 32rem;
             width: 75%;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .main-content.expanded-4 {
+            transform: translateY(-45vh);
+            padding-bottom: 30vh;
+          }
+
+          .contact-form {
+            width: 90vw;
+            margin: 1rem auto 8rem auto;
+            padding: 1.5rem 1rem;
           }
         }
       `}</style>
