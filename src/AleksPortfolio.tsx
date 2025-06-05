@@ -416,9 +416,9 @@ export default function AleksPortfolio() {
           text-align: center;
           transition: transform 1.8s cubic-bezier(0.23, 1, 0.32, 1);
           will-change: transform;
-          margin-top: 50vh;
+          margin-top: 45vh;
           padding: 0;
-          padding-bottom: 50vh;
+          padding-bottom: 60vh;
           max-height: none;
           overflow: visible;
           box-sizing: border-box;
@@ -426,19 +426,19 @@ export default function AleksPortfolio() {
         }
 
         .main-content.expanded-1 {
-          transform: translateY(-20vh);
+          transform: translateY(-10vh);
         }
 
         .main-content.expanded-2 {
-          transform: translateY(-40vh);
+          transform: translateY(-20vh);
         }
 
         .main-content.expanded-3 {
-          transform: translateY(-60vh);
+          transform: translateY(-30vh);
         }
 
         .main-content.expanded-4 {
-          transform: translateY(-80vh);
+          transform: translateY(-40vh);
         }
 
         .desktop-text {
