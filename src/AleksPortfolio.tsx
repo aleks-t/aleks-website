@@ -396,6 +396,7 @@ export default function AleksPortfolio() {
           overscroll-behavior: none;
           position: fixed;
           width: 100%;
+          padding-bottom: env(safe-area-inset-bottom);
         }
 
         .top-gradient {
@@ -417,10 +418,11 @@ export default function AleksPortfolio() {
           will-change: transform;
           margin-top: 42vh;
           padding: 0;
-          padding-bottom: 3vh;
-          max-height: 100vh;
+          padding-bottom: 8vh;
+          max-height: none;
           overflow: visible;
           box-sizing: border-box;
+          min-height: 100vh;
         }
 
         .main-content.expanded-1 {
@@ -436,12 +438,13 @@ export default function AleksPortfolio() {
         }
 
         .main-content.expanded-4 {
-          transform: translateY(-80vh);
+          transform: translateY(-70vh);
+          padding-bottom: 15vh;
         }
 
         .desktop-text {
           display: block;
-          font-size: clamp(0.8rem, 3vw, 1.2rem);
+          font-size: clamp(1rem, 4vw, 1.4rem);
           color: rgba(255, 255, 255, 0.85);
           padding: 0 2.5vw;
           max-width: 95vw;
@@ -450,20 +453,20 @@ export default function AleksPortfolio() {
           hyphens: auto;
           font-weight: 400;
           letter-spacing: -0.01em;
-          line-height: 1.25;
+          line-height: 1.3;
           box-sizing: border-box;
         }
 
         .mobile-text {
           display: none;
-          font-size: clamp(0.9rem, 3.5vw, 1.2rem);
+          font-size: clamp(1.1rem, 4.5vw, 1.4rem);
           color: rgba(255, 255, 255, 0.85);
           margin: 1rem 2.5vw;
           max-width: 95vw;
           word-wrap: break-word;
           hyphens: auto;
           font-weight: 400;
-          line-height: 1.25;
+          line-height: 1.3;
           box-sizing: border-box;
         }
 
@@ -616,7 +619,7 @@ export default function AleksPortfolio() {
           width: 92vw;
           max-width: 92vw;
           margin: 0.8rem auto;
-          padding: 0.5rem 0.7rem;
+          padding: 0.8rem 1rem;
           color: rgba(255, 255, 255, 0.75);
           transition: opacity 1s ease, visibility 1s ease, transform 1s ease;
           min-height: auto;
@@ -624,8 +627,8 @@ export default function AleksPortfolio() {
           overflow-wrap: break-word;
           hyphens: auto;
           box-sizing: border-box;
-          font-size: 0.7rem;
-          line-height: 1.4;
+          font-size: clamp(0.85rem, 3.5vw, 0.9rem);
+          line-height: 1.5;
           text-align: center;
           background: rgba(255, 255, 255, 0.02);
           border: 1px solid rgba(255, 255, 255, 0.08);
@@ -638,30 +641,10 @@ export default function AleksPortfolio() {
           .content-section {
             max-width: 28rem;
             width: 80%;
-            padding: 0.7rem 0.9rem;
-            font-size: 0.75rem;
-            line-height: 1.4;
-            margin: 1.2rem auto;
-          }
-
-          .timeline-text {
-            font-size: 0.75rem;
-            line-height: 1.4;
-          }
-
-          .section-hint {
-            font-size: 0.85rem;
-          }
-        }
-
-        @media (min-width: 1024px) {
-          .content-section {
-            max-width: 32rem;
-            width: 75%;
-            padding: 0.9rem 1.1rem;
+            padding: 0.9rem 1.2rem;
             font-size: 0.8rem;
             line-height: 1.45;
-            margin: 1.5rem auto;
+            margin: 1.2rem auto;
           }
 
           .timeline-text {
@@ -671,6 +654,26 @@ export default function AleksPortfolio() {
 
           .section-hint {
             font-size: 0.9rem;
+          }
+        }
+
+        @media (min-width: 1024px) {
+          .content-section {
+            max-width: 32rem;
+            width: 75%;
+            padding: 1rem 1.4rem;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            margin: 1.5rem auto;
+          }
+
+          .timeline-text {
+            font-size: 0.85rem;
+            line-height: 1.5;
+          }
+
+          .section-hint {
+            font-size: 0.95rem;
           }
         }
 
@@ -691,8 +694,8 @@ export default function AleksPortfolio() {
           hyphens: auto;
           max-width: 100%;
           margin: 0;
-          font-size: 0.7rem;
-          line-height: 1.4;
+          font-size: clamp(0.8rem, 3.5vw, 0.85rem);
+          line-height: 1.5;
           text-align: center;
           color: rgba(255, 255, 255, 0.85);
         }
@@ -708,11 +711,11 @@ export default function AleksPortfolio() {
         }
 
         .section-hint {
-          font-size: 0.8rem;
+          font-size: clamp(0.85rem, 3.5vw, 0.9rem);
           color: rgba(255, 255, 255, 0.4);
           text-transform: uppercase;
           letter-spacing: 0.1em;
-          margin-bottom: 0.8rem;
+          margin-bottom: 1rem;
           text-align: center;
           font-weight: 500;
         }
@@ -1465,24 +1468,24 @@ export default function AleksPortfolio() {
         }
 
         .contact-form .form-title {
-          font-size: 0.9rem;
+          font-size: clamp(0.95rem, 4vw, 1rem);
           color: rgba(255, 255, 255, 0.4);
           text-transform: uppercase;
           letter-spacing: 0.1em;
-          margin-bottom: 1.5rem;
+          margin-bottom: 1.8rem;
           text-align: center;
           font-weight: 500;
         }
 
         .contact-form .form-group {
-          margin-bottom: 1.2rem;
+          margin-bottom: 1.4rem;
         }
 
         .contact-form label {
           display: block;
-          font-size: 0.75rem;
+          font-size: clamp(0.8rem, 3.5vw, 0.85rem);
           color: rgba(255, 255, 255, 0.6);
-          margin-bottom: 0.5rem;
+          margin-bottom: 0.6rem;
           font-weight: 500;
           letter-spacing: 0.02em;
         }
@@ -1490,12 +1493,12 @@ export default function AleksPortfolio() {
         .contact-form input,
         .contact-form textarea {
           width: 100%;
-          padding: 0.8rem 1rem;
+          padding: 1rem 1.2rem;
           background: rgba(255, 255, 255, 0.05);
           border: 1px solid rgba(255, 255, 255, 0.15);
           border-radius: 8px;
           color: rgba(255, 255, 255, 0.9);
-          font-size: 0.8rem;
+          font-size: clamp(0.9rem, 3.5vw, 0.95rem);
           font-family: inherit;
           transition: all 0.3s ease;
           box-sizing: border-box;
