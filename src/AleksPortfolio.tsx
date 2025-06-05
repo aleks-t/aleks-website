@@ -176,15 +176,25 @@ export default function AleksPortfolio() {
   };
 
   const handleTouchStart = (event: TouchEvent) => {
+    console.log('Touch start detected', { y: event.touches[0].clientY, timestamp: Date.now() });
     touchStartY.current = event.touches[0].clientY;
     touchStartTime.current = Date.now();
+    // Prevent default to stop iOS bounce/scroll
+    event.preventDefault();
   };
 
   const handleTouchEnd = (event: TouchEvent) => {
     const now = Date.now();
-    const touchDelay = 800; // Reduced delay for mobile responsiveness
+    const touchDelay = 600; // Faster response for mobile
     
+    console.log('Touch end detected', { 
+      y: event.changedTouches[0].clientY, 
+      startY: touchStartY.current,
+      duration: now - touchStartTime.current 
+    });
+
     if (isAnimating.current || now - lastWheelTime.current < touchDelay) {
+      console.log('Touch blocked - animating or too soon');
       return;
     }
 
@@ -193,26 +203,34 @@ export default function AleksPortfolio() {
     const touchDistance = Math.abs(touchEndY - touchStartY.current);
     const deltaY = touchStartY.current - touchEndY;
     
-    // More lenient thresholds for mobile:
-    // - Longer duration allowed (under 1200ms)
-    // - Shorter distance required (at least 30px)
-    if (touchDuration > 1200 || touchDistance < 30) {
+    console.log('Touch analysis', { touchDuration, touchDistance, deltaY, expansionLevel });
+    
+    // Very lenient thresholds for iOS:
+    // - Allow up to 1500ms duration
+    // - Require only 20px minimum distance
+    if (touchDuration > 1500 || touchDistance < 20) {
+      console.log('Touch rejected - duration or distance threshold');
       return;
     }
 
-    // Fixed swipe direction logic:
-    // - Positive deltaY = swipe up (finger moves up, content moves down - expand)
-    // - Negative deltaY = swipe down (finger moves down, content moves up - collapse)
+    // Clear swipe direction logic for iOS:
+    // - Positive deltaY = swipe up (finger moves up) = expand content
+    // - Negative deltaY = swipe down (finger moves down) = collapse content
     const isSwipeUp = deltaY > 0;
+    
+    console.log('Touch accepted', { isSwipeUp, expansionLevel });
     
     isAnimating.current = true;
     lastWheelTime.current = now;
 
     if (isSwipeUp && expansionLevel < 4) {
+      console.log('Expanding content');
       toggleContent(true);
     } else if (!isSwipeUp && expansionLevel > 0) {
+      console.log('Collapsing content');
       toggleContent(false);
     } else {
+      console.log('No action - already at limit');
       isAnimating.current = false;
       return;
     }
@@ -221,6 +239,7 @@ export default function AleksPortfolio() {
       isAnimating.current = false;
     }, 700);
     
+    // Prevent default to stop iOS bounce/scroll
     event.preventDefault();
   };
 
@@ -324,17 +343,24 @@ export default function AleksPortfolio() {
     const handleWheelEvent = (e: WheelEvent) => handleWheel(e);
     const handleTouchStartEvent = (e: TouchEvent) => handleTouchStart(e);
     const handleTouchEndEvent = (e: TouchEvent) => handleTouchEnd(e);
+    const handleTouchMoveEvent = (e: TouchEvent) => {
+      // Prevent iOS scroll bounce
+      e.preventDefault();
+    };
     
-    window.addEventListener('wheel', handleWheelEvent, { passive: false });
-    window.addEventListener('touchstart', handleTouchStartEvent, { passive: false });
-    window.addEventListener('touchend', handleTouchEndEvent, { passive: false });
+    // Use document.body for better iOS compatibility
+    document.body.addEventListener('wheel', handleWheelEvent, { passive: false });
+    document.body.addEventListener('touchstart', handleTouchStartEvent, { passive: false });
+    document.body.addEventListener('touchend', handleTouchEndEvent, { passive: false });
+    document.body.addEventListener('touchmove', handleTouchMoveEvent, { passive: false });
     
     handleExpansion();
     
     return () => {
-      window.removeEventListener('wheel', handleWheelEvent);
-      window.removeEventListener('touchstart', handleTouchStartEvent);
-      window.removeEventListener('touchend', handleTouchEndEvent);
+      document.body.removeEventListener('wheel', handleWheelEvent);
+      document.body.removeEventListener('touchstart', handleTouchStartEvent);
+      document.body.removeEventListener('touchend', handleTouchEndEvent);
+      document.body.removeEventListener('touchmove', handleTouchMoveEvent);
       clearInterval(timeInterval);
     };
   }, [expansionLevel]);
@@ -367,6 +393,10 @@ export default function AleksPortfolio() {
           -webkit-touch-callout: none;
           -webkit-user-select: none;
           user-select: none;
+          -webkit-overflow-scrolling: none;
+          overscroll-behavior: none;
+          position: fixed;
+          width: 100%;
         }
 
         .top-gradient {
