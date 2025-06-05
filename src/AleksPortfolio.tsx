@@ -176,29 +176,15 @@ export default function AleksPortfolio() {
   };
 
   const handleTouchStartReact = (event: React.TouchEvent) => {
-    console.log('🔥 TOUCH START:', { 
-      y: event.touches[0].clientY, 
-      timestamp: Date.now(),
-      expansionLevel: expansionLevel 
-    });
     touchStartY.current = event.touches[0].clientY;
     touchStartTime.current = Date.now();
-    // Remove preventDefault to allow iOS to process the touch
   };
 
   const handleTouchEndReact = (event: React.TouchEvent) => {
     const now = Date.now();
-    const touchDelay = 600;
+    const touchDelay = 300; // Reduced delay for better responsiveness
     
-    console.log('🔥 TOUCH END:', { 
-      y: event.changedTouches[0].clientY, 
-      startY: touchStartY.current,
-      duration: now - touchStartTime.current,
-      expansionLevel: expansionLevel
-    });
-
     if (isAnimating.current || now - lastWheelTime.current < touchDelay) {
-      console.log('❌ TOUCH BLOCKED: animating or too soon');
       return;
     }
 
@@ -207,40 +193,21 @@ export default function AleksPortfolio() {
     const touchDistance = Math.abs(touchEndY - touchStartY.current);
     const deltaY = touchStartY.current - touchEndY;
     
-    console.log('📊 TOUCH ANALYSIS:', { 
-      touchDuration, 
-      touchDistance, 
-      deltaY, 
-      expansionLevel,
-      thresholds: { maxDuration: 1500, minDistance: 20 }
-    });
-    
-    // More lenient thresholds for iOS
-    if (touchDuration > 1500 || touchDistance < 20) {
-      console.log('❌ TOUCH REJECTED: duration or distance');
+    // More lenient thresholds for better mobile experience
+    if (touchDuration > 1000 || touchDistance < 30) {
       return;
     }
 
     const isSwipeUp = deltaY > 0;
     
-    console.log('✅ TOUCH ACCEPTED:', { 
-      isSwipeUp, 
-      currentLevel: expansionLevel,
-      willExpand: isSwipeUp && expansionLevel < 4,
-      willCollapse: !isSwipeUp && expansionLevel > 0
-    });
-    
     isAnimating.current = true;
     lastWheelTime.current = now;
 
     if (isSwipeUp && expansionLevel < 4) {
-      console.log('⬆️ EXPANDING to level:', expansionLevel + 1);
       toggleContent(true);
     } else if (!isSwipeUp && expansionLevel > 0) {
-      console.log('⬇️ COLLAPSING to level:', expansionLevel - 1);
       toggleContent(false);
     } else {
-      console.log('🚫 NO ACTION: already at limit');
       isAnimating.current = false;
       return;
     }
@@ -414,31 +381,31 @@ export default function AleksPortfolio() {
           position: relative;
           width: 100vw;
           text-align: center;
-          transition: transform 1.8s cubic-bezier(0.23, 1, 0.32, 1);
+          transition: transform 2.2s cubic-bezier(0.23, 1, 0.32, 1);
           will-change: transform;
           margin-top: 42vh;
           padding: 0;
-          padding-bottom: 20vh;
+          padding-bottom: 30vh;
           max-height: none;
           overflow: visible;
           box-sizing: border-box;
         }
 
-        /* Very gentle movements */
+        /* Much more conservative transforms to keep content visible */
         .main-content.expanded-1 {
-          transform: translateY(-8vh);
+          transform: translateY(0);
         }
 
         .main-content.expanded-2 {
-          transform: translateY(-16vh);
+          transform: translateY(-50vh);
         }
 
         .main-content.expanded-3 {
-          transform: translateY(-24vh);
+          transform: translateY(-75vh);
         }
 
         .main-content.expanded-4 {
-          transform: translateY(-32vh);
+          transform: translateY(-125vh);
         }
 
         /* Each content section gets its own "page" */
@@ -447,7 +414,7 @@ export default function AleksPortfolio() {
           visibility: hidden;
           width: 90vw;
           max-width: 32rem;
-          margin: 1.5rem auto;
+          margin: 3rem auto;
           padding: 1.5rem;
           color: rgba(255, 255, 255, 0.75);
           transition: opacity 1s ease, visibility 1s ease, transform 1s ease;
@@ -1382,8 +1349,8 @@ export default function AleksPortfolio() {
           visibility: hidden;
           width: 90vw;
           max-width: 32rem;
-          margin: 0 auto;
-          padding: 2rem 1.5rem;
+          margin: 0 auto 5vh auto;
+          padding: 1.2rem 1rem;
           background: rgba(255, 255, 255, 0.03);
           border: 1px solid rgba(255, 255, 255, 0.12);
           border-radius: 12px;
@@ -1391,7 +1358,7 @@ export default function AleksPortfolio() {
           transition: all 1s cubic-bezier(0.23, 1, 0.32, 1);
           transform: translateY(30px);
           box-sizing: border-box;
-          min-height: 70vh;
+          min-height: 40vh;
           display: flex;
           flex-direction: column;
           justify-content: center;
