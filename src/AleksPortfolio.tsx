@@ -13,48 +13,18 @@ export default function AleksPortfolio() {
   const [weatherEmoji, setWeatherEmoji] = useState("🔍");
   const [contactExpanded, setContactExpanded] = useState(false);
   const [contactDiscovered, setContactDiscovered] = useState(false);
-  const [formStatus, setFormStatus] = useState('idle');
+  const [formStatus, setFormStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [formMessage, setFormMessage] = useState('');
-  const [screenSize, setScreenSize] = useState({ width: 0, height: 0, isMobile: false });
-  const [isFormVisible, setIsFormVisible] = useState(true);
-  const [debugInfo, setDebugInfo] = useState({});
   
   const lastWheelTime = useRef(0);
   const isAnimating = useRef(false);
   const timelineRef = useRef(null);
-  const containerRef = useRef(null);
-  const formRef = useRef(null);
-  const heroRef = useRef(null);
-  const section1Ref = useRef(null);
-  const section2Ref = useRef(null);
-  const section3Ref = useRef(null);
 
   const CONFIG = {
     ZIP_CODE: '94132',
     REFRESH_INTERVAL: 300000,
     API_TIMEOUT: 5000,
     ARTIFICIAL_DELAY: 4000
-  };
-
-  // Screen size detection and responsive utilities
-  const updateScreenSize = () => {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    const isMobile = width < 768;
-    const isTablet = width >= 768 && width < 1024;
-    const isDesktop = width >= 1024;
-    
-    setScreenSize({ 
-      width, 
-      height, 
-      isMobile,
-      isTablet,
-      isDesktop,
-      // Calculate safe viewport height accounting for mobile browsers
-      safeHeight: window.innerHeight,
-      // Determine expansion levels based on content
-      maxExpansionLevel: isMobile ? 4 : 4
-    });
   };
 
   const getTimeBasedEmoji = () => {
@@ -115,10 +85,15 @@ export default function AleksPortfolio() {
   };
 
   const fetchWeather = async () => {
-    const randomDelay = Math.floor(Math.random() * 5000) + 5000;
-    let finalLocation = 'San Francisco, CA';
+    // Random delay between 5-10 seconds to simulate realistic searching
+    const randomDelay = Math.floor(Math.random() * 5000) + 5000; // 5000-10000ms (5-10 seconds)
+    
+    // Store the final location so it's available when the weather container becomes visible
+    let finalLocation = 'San Francisco, CA'; // Default fallback
 
     const isFastConnection = await checkConnectionSpeed();
+    
+    // Always add the artificial delay regardless of connection speed
     await new Promise(resolve => setTimeout(resolve, CONFIG.ARTIFICIAL_DELAY));
     
     try {
@@ -145,14 +120,14 @@ export default function AleksPortfolio() {
     }
   };
 
-  const toggleContent = (expand) => {
-    if (expand && expansionLevel < screenSize.maxExpansionLevel) {
+  const toggleContent = (expand: boolean) => {
+    if (expand && expansionLevel < 4) {
       const newLevel = expansionLevel + 1;
       setExpansionLevel(newLevel);
       
       if (newLevel === 1) {
         setShowWeatherOnMobile(true);
-        if (screenSize.isMobile && !weatherAnimationStarted) {
+        if (window.innerWidth <= 640 && !weatherAnimationStarted) {
           setWeatherAnimationStarted(true);
           if (!weatherAnimationCompleted) {
             fetchWeather();
@@ -169,9 +144,9 @@ export default function AleksPortfolio() {
     }
   };
 
-  const handleWheel = (event) => {
+  const handleWheel = (event: WheelEvent) => {
     const now = Date.now();
-    const wheelDelay = screenSize.isMobile ? 800 : 1200;
+    const wheelDelay = 1200;
     
     if (isAnimating.current || now - lastWheelTime.current < wheelDelay) {
       return;
@@ -182,7 +157,7 @@ export default function AleksPortfolio() {
     isAnimating.current = true;
     lastWheelTime.current = now;
 
-    if (isScrollingDown && expansionLevel < screenSize.maxExpansionLevel) {
+    if (isScrollingDown && expansionLevel < 4) {
       toggleContent(true);
     } else if (!isScrollingDown && expansionLevel > 0) {
       toggleContent(false);
@@ -198,10 +173,10 @@ export default function AleksPortfolio() {
     event.preventDefault();
   };
 
-  const handleTimelineMove = (e) => {
+  const handleTimelineMove = (e: React.MouseEvent) => {
     if (!timelineRef.current) return;
     
-    const rect = timelineRef.current.getBoundingClientRect();
+    const rect = (timelineRef.current as HTMLElement).getBoundingClientRect();
     const position = ((e.clientX - rect.left) / rect.width) * 100;
     const exactPosition = Math.max(0, Math.min(100, position));
     
@@ -215,21 +190,23 @@ export default function AleksPortfolio() {
     }
   };
 
-  const handleTimelineItemClick = (index) => {
+  const handleTimelineItemClick = (index: number) => {
     const position = (index / (timelineData.length - 1)) * 100;
     setMousePosition(position);
     setTimelineText(timelineData[index].description);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
     setFormStatus('submitting');
     setFormMessage('');
     
-    const form = e.target;
+    const form = e.target as HTMLFormElement;
     const formData = new FormData(form);
+    
+    // Add Formspree's required field to prevent any mailto fallback
     formData.append('_subject', 'New contact from portfolio');
     
     try {
@@ -245,6 +222,7 @@ export default function AleksPortfolio() {
         setFormStatus('success');
         setFormMessage('Thanks! Your message has been sent successfully.');
         form.reset();
+        // Clear success message after 5 seconds
         setTimeout(() => {
           setFormStatus('idle');
           setFormMessage('');
@@ -257,6 +235,7 @@ export default function AleksPortfolio() {
       console.error('Form submission error:', error);
       setFormStatus('error');
       setFormMessage('Oops! There was a problem sending your message. Please try again.');
+      // Clear error message after 5 seconds
       setTimeout(() => {
         setFormStatus('idle');
         setFormMessage('');
@@ -268,8 +247,10 @@ export default function AleksPortfolio() {
     if (expansionLevel >= 0) {
       setContactDiscovered(true);
       if (expansionLevel >= 3) {
+        // Expand to show both email and LinkedIn at level 3
         setContactExpanded(true);
       } else {
+        // Show just email button (collapsed) at levels 0-2
         setContactExpanded(false);
       }
     } else {
@@ -278,58 +259,18 @@ export default function AleksPortfolio() {
     }
   };
 
-  // Touch handling for mobile
-  const [touchStart, setTouchStart] = useState(null);
-  const [touchEnd, setTouchEnd] = useState(null);
-
-  const handleTouchStart = (e) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientY);
-  };
-
-  const handleTouchMove = (e) => {
-    setTouchEnd(e.targetTouches[0].clientY);
-  };
-
-  const handleTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-    
-    const distance = touchStart - touchEnd;
-    const isUpSwipe = distance > 50;
-    const isDownSwipe = distance < -50;
-
-    if (isUpSwipe && expansionLevel < screenSize.maxExpansionLevel) {
-      toggleContent(true);
-    }
-    if (isDownSwipe && expansionLevel > 0) {
-      toggleContent(false);
-    }
-  };
-
-  useEffect(() => {
-    updateScreenSize();
-    
-    const handleResize = () => {
-      updateScreenSize();
-      // Recheck form visibility on resize
-      setTimeout(checkFormVisibility, 100);
-    };
-    
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
   useEffect(() => {
     setWeatherAnimationStarted(true);
     fetchWeather();
     
+    // Initialize timeline to first position
     setMousePosition(0);
     setTimelineText(timelineData[0].description);
     
     updateTime();
     const timeInterval = setInterval(updateTime, 60000);
     
-    const handleWheelEvent = (e) => handleWheel(e);
+    const handleWheelEvent = (e: WheelEvent) => handleWheel(e);
     window.addEventListener('wheel', handleWheelEvent, { passive: false });
     
     handleExpansion();
@@ -338,121 +279,32 @@ export default function AleksPortfolio() {
       window.removeEventListener('wheel', handleWheelEvent);
       clearInterval(timeInterval);
     };
-  }, [expansionLevel, screenSize]);
-
-  // Check form visibility after transitions
-  useEffect(() => {
-    if (expansionLevel === 4) {
-      const timer = setTimeout(checkFormVisibility, 1300); // After transition completes
-      return () => clearTimeout(timer);
-    }
   }, [expansionLevel]);
-
-  // Dynamic styles based on screen size and expansion level
-  const getContainerStyle = () => {
-    const availableHeight = screenSize.safeHeight;
-    
-    // Much more aggressive positioning for level 4
-    if (expansionLevel === 4) {
-      // Calculate total content height and force it to fit
-      const heroHeight = 80;
-      const sectionsHeight = 3 * 120; // 3 sections at 120px each
-      const formHeight = 280;
-      const totalNeeded = heroHeight + sectionsHeight + formHeight;
-      
-      // If content is taller than screen, position at very top
-      if (totalNeeded > availableHeight) {
-        return {
-          transform: `translateY(10px)`, // Almost at top
-          transition: 'transform 1.2s cubic-bezier(0.23, 1, 0.32, 1)'
-        };
-      }
-      
-      // Otherwise position to fit exactly
-      const position = Math.max(10, availableHeight - totalNeeded - 20);
-      return {
-        transform: `translateY(${position}px)`,
-        transition: 'transform 1.2s cubic-bezier(0.23, 1, 0.32, 1)'
-      };
-    }
-    
-    // For other levels, use progressive positioning
-    const positions = {
-      0: availableHeight * 0.45,  // Center
-      1: availableHeight * 0.35,  // Up a bit
-      2: availableHeight * 0.25,  // Higher
-      3: availableHeight * 0.15   // Much higher
-    };
-    
-    return {
-      transform: `translateY(${positions[expansionLevel]}px)`,
-      transition: 'transform 1.2s cubic-bezier(0.23, 1, 0.32, 1)'
-    };
-  };
-
-  // Check if form is visible in viewport
-  const checkFormVisibility = () => {
-    if (!formRef.current || expansionLevel < 4) return;
-    
-    const formRect = formRef.current.getBoundingClientRect();
-    const viewportHeight = window.innerHeight;
-    
-    // Check if form bottom is below viewport
-    const isFormCutOff = formRect.bottom > viewportHeight - 50; // Bigger buffer
-    setIsFormVisible(!isFormCutOff);
-    
-    console.log('Form check:', {
-      formBottom: formRect.bottom,
-      viewportHeight,
-      isFormCutOff,
-      expansionLevel
-    });
-  };
 
   const mainContentClass = `main-content ${expansionLevel > 0 ? `expanded-${expansionLevel}` : ''}`;
   const firstExpandClass = `expand-button ${expansionLevel > 0 ? 'expanded' : ''}`;
 
   return (
-    <div 
-      ref={containerRef}
-      className="portfolio-container"
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-      style={{
-        minHeight: '100vh',
-        height: `${screenSize.safeHeight}px`,
-        maxHeight: `${screenSize.safeHeight}px`,
-        background: '#000000',
-        color: 'white',
-        overflow: 'hidden',
-        position: 'relative',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center'
-      }}
-    >
+    <div className="min-h-screen bg-black text-white overflow-hidden relative flex flex-col items-center" style={{ height: '100vh', maxHeight: '100vh' }}>
       <style>{`
-        * {
-          box-sizing: border-box;
+        :root {
+          --base-unit: calc(1.5vh + 1.5vw);
+          --font-base: calc(var(--base-unit) * 0.7);
+          --spacing-unit: calc(var(--base-unit) * 0.5);
+          --font-size: clamp(1rem, var(--font-base), 2rem);
+          --icon-size: calc(var(--font-size) * 1.5);
+          --emoji-size: calc(var(--font-size) * 1.2);
+          --bottom-spacing: calc(var(--spacing-unit) * 2);
+          --safe-area-bottom: max(1.5rem, env(safe-area-inset-bottom));
         }
 
         body {
           font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
-          margin: 0;
-          padding: 0;
           background: #000000;
           color: rgba(255, 255, 255, 0.7);
-          overflow: hidden;
-          height: 100vh;
-          width: 100vw;
-        }
-
-        .portfolio-container {
-          width: 100vw;
-          position: relative;
-          padding: 0;
           margin: 0;
+          height: 100vh;
+          overflow: hidden;
         }
 
         .top-gradient {
@@ -460,7 +312,7 @@ export default function AleksPortfolio() {
           top: 0;
           left: 0;
           right: 0;
-          height: clamp(100px, 15vh, 150px);
+          height: 150px;
           background: linear-gradient(to bottom, rgba(0, 0, 0, 1) 20%, rgba(0, 0, 0, 0) 100%);
           pointer-events: none;
           z-index: 50;
@@ -468,45 +320,60 @@ export default function AleksPortfolio() {
 
         .main-content {
           position: relative;
-          width: 100%;
+          width: 100vw;
           text-align: center;
+          transition: transform 1.8s cubic-bezier(0.23, 1, 0.32, 1);
           will-change: transform;
-          padding: 0 1rem;
-          max-width: 100vw;
+          margin-top: 42vh;
+          padding: 0;
+          padding-bottom: 3vh;
+          max-height: 100vh;
           overflow: visible;
+          box-sizing: border-box;
         }
 
-        .desktop-text, .mobile-text {
-          font-size: clamp(0.9rem, 4vw, 1.4rem);
+        .main-content.expanded-1 {
+          transform: translateY(-15vh);
+        }
+
+        .main-content.expanded-2 {
+          transform: translateY(-25vh);
+        }
+
+        .main-content.expanded-3 {
+          transform: translateY(-35vh);
+        }
+
+        .main-content.expanded-4 {
+          transform: translateY(-80vh);
+        }
+
+        .desktop-text {
+          display: block;
+          font-size: clamp(0.8rem, 3vw, 1.2rem);
           color: rgba(255, 255, 255, 0.85);
-          max-width: 95%;
+          padding: 0 2.5vw;
+          max-width: 95vw;
           margin: 0 auto;
           word-wrap: break-word;
           hyphens: auto;
           font-weight: 400;
           letter-spacing: -0.01em;
-          line-height: 1.3;
-          padding: 0 0.5rem;
+          line-height: 1.25;
+          box-sizing: border-box;
         }
 
-        @media (max-width: 767px) {
-          .desktop-text {
-            display: none;
-          }
-          .mobile-text {
-            display: block;
-            font-size: clamp(1rem, 5vw, 1.2rem);
-            line-height: 1.4;
-          }
-        }
-
-        @media (min-width: 768px) {
-          .mobile-text {
-            display: none;
-          }
-          .desktop-text {
-            display: block;
-          }
+        .mobile-text {
+          display: none;
+          font-size: clamp(0.9rem, 3.5vw, 1.2rem);
+          color: rgba(255, 255, 255, 0.85);
+          margin: 1rem 2.5vw;
+          max-width: 95vw;
+          word-wrap: break-word;
+          hyphens: auto;
+          font-weight: 400;
+          line-height: 1.25;
+          box-sizing: border-box;
         }
 
         .name {
@@ -545,6 +412,30 @@ export default function AleksPortfolio() {
           75% { transform: translateX(0) rotate(15deg); }
         }
 
+        .role:hover {
+          padding-right: 4.2em;
+        }
+
+        .role::after {
+          content: "@Card79";
+          position: absolute;
+          right: 0;
+          opacity: 0;
+          transition: all 0.3s ease;
+          transform: translateX(100%);
+          font-size: 0.95em;
+        }
+
+        .name:hover::after {
+          opacity: 0.5;
+        }
+
+        .vision {
+          position: relative;
+          z-index: 2;
+          transition: all 0.5s ease;
+        }
+
         .execution {
           position: relative;
           color: rgba(255, 255, 255, 0.85);
@@ -581,9 +472,9 @@ export default function AleksPortfolio() {
 
         .expand-button {
           position: relative;
-          width: clamp(24px, 6vw, 32px);
-          height: clamp(24px, 6vw, 32px);
-          margin: clamp(0.8rem, 2vw, 1.2rem) auto;
+          width: 28px;
+          height: 28px;
+          margin: 1.5rem auto;
           cursor: pointer;
           transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
           opacity: 0.6;
@@ -596,7 +487,7 @@ export default function AleksPortfolio() {
           justify-content: center;
         }
 
-        .expand-button:hover, .expand-button:active {
+        .expand-button:hover {
           opacity: 0.9;
           transform: scale(1.1);
           border-color: rgba(255, 255, 255, 0.4);
@@ -606,8 +497,8 @@ export default function AleksPortfolio() {
         .expand-button::before {
           content: '';
           position: absolute;
-          width: clamp(8px, 2vw, 12px);
-          height: clamp(8px, 2vw, 12px);
+          width: 10px;
+          height: 10px;
           border-right: 2px solid rgba(255, 255, 255, 0.8);
           border-bottom: 2px solid rgba(255, 255, 255, 0.8);
           transform: translate(-50%, -50%) rotate(45deg);
@@ -631,23 +522,65 @@ export default function AleksPortfolio() {
         .content-section {
           opacity: 0;
           visibility: hidden;
-          width: 95%;
-          max-width: min(90vw, 32rem);
-          margin: clamp(0.3rem, 1vw, 0.8rem) auto;
-          padding: clamp(0.8rem, 2vw, 1.2rem);
+          width: 92vw;
+          max-width: 92vw;
+          margin: 0.8rem auto;
+          padding: 0.5rem 0.7rem;
           color: rgba(255, 255, 255, 0.75);
           transition: opacity 1s ease, visibility 1s ease, transform 1s ease;
+          min-height: auto;
           word-wrap: break-word;
           overflow-wrap: break-word;
           hyphens: auto;
-          font-size: clamp(0.75rem, 2.5vw, 0.85rem);
+          box-sizing: border-box;
+          font-size: 0.7rem;
           line-height: 1.4;
           text-align: center;
           background: rgba(255, 255, 255, 0.02);
           border: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: clamp(6px, 1.5vw, 8px);
+          border-radius: 6px;
           backdrop-filter: blur(20px);
-          transform: translateY(15px);
+          transform: translateY(20px);
+        }
+
+        @media (min-width: 640px) {
+          .content-section {
+            max-width: 28rem;
+            width: 80%;
+            padding: 0.7rem 0.9rem;
+            font-size: 0.75rem;
+            line-height: 1.4;
+            margin: 1.2rem auto;
+          }
+
+          .timeline-text {
+            font-size: 0.75rem;
+            line-height: 1.4;
+          }
+
+          .section-hint {
+            font-size: 0.85rem;
+          }
+        }
+
+        @media (min-width: 1024px) {
+          .content-section {
+            max-width: 32rem;
+            width: 75%;
+            padding: 0.9rem 1.1rem;
+            font-size: 0.8rem;
+            line-height: 1.45;
+            margin: 1.5rem auto;
+          }
+
+          .timeline-text {
+            font-size: 0.8rem;
+            line-height: 1.45;
+          }
+
+          .section-hint {
+            font-size: 0.9rem;
+          }
         }
 
         .content-section.visible {
@@ -661,12 +594,34 @@ export default function AleksPortfolio() {
           text-align: center;
         }
 
+        .timeline-text {
+          word-wrap: break-word;
+          overflow-wrap: break-word;
+          hyphens: auto;
+          max-width: 100%;
+          margin: 0;
+          font-size: 0.7rem;
+          line-height: 1.4;
+          text-align: center;
+          color: rgba(255, 255, 255, 0.85);
+        }
+
+        .metric {
+          color: rgba(255, 255, 255, 0.9);
+          font-weight: 600;
+        }
+
+        .highlight {
+          color: rgba(255, 255, 255, 0.95);
+          font-weight: 500;
+        }
+
         .section-hint {
-          font-size: clamp(0.7rem, 2vw, 0.85rem);
+          font-size: 0.8rem;
           color: rgba(255, 255, 255, 0.4);
           text-transform: uppercase;
           letter-spacing: 0.1em;
-          margin-bottom: clamp(0.6rem, 2vw, 0.8rem);
+          margin-bottom: 0.8rem;
           text-align: center;
           font-weight: 500;
         }
@@ -674,18 +629,17 @@ export default function AleksPortfolio() {
         .timeline {
           position: relative;
           width: 100%;
-          height: clamp(60px, 12vw, 80px);
+          height: 80px;
           cursor: pointer;
-          margin-bottom: clamp(0.8rem, 2vw, 1.2rem);
-          padding: 0 clamp(0.5rem, 2vw, 1rem);
+          margin-bottom: 1rem;
         }
 
         .timeline::before {
           content: '';
           position: absolute;
-          top: 50%;
-          left: clamp(0.5rem, 2vw, 1rem);
-          right: clamp(0.5rem, 2vw, 1rem);
+          top: 50px;
+          left: 0;
+          width: 100%;
           height: 2px;
           background: rgba(255, 255, 255, 0.3);
           z-index: 1;
@@ -694,10 +648,10 @@ export default function AleksPortfolio() {
         .timeline::after {
           content: '';
           position: absolute;
-          top: 50%;
-          left: calc(clamp(0.5rem, 2vw, 1rem) + ${mousePosition}% * (100% - ${2 * parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--timeline-padding') || '1rem')}));
-          width: clamp(8px, 2vw, 12px);
-          height: clamp(8px, 2vw, 12px);
+          top: 50px;
+          left: ${mousePosition}%;
+          width: 10px;
+          height: 10px;
           background: rgba(255, 255, 255, 0.9);
           border-radius: 50%;
           transform: translate(-50%, -50%);
@@ -714,14 +668,14 @@ export default function AleksPortfolio() {
           transform: translateX(-50%);
           opacity: 1;
           cursor: pointer;
-          width: clamp(40px, 10vw, 60px);
+          width: 50px;
           text-align: center;
-          padding: clamp(4px, 1vw, 8px) 0;
+          padding: 6px 0;
           z-index: 3;
         }
 
         .timeline-item .year {
-          font-size: clamp(0.7rem, 2vw, 0.85rem);
+          font-size: 0.85em;
           color: rgba(255, 255, 255, 0.7);
           display: block;
           white-space: nowrap;
@@ -729,33 +683,20 @@ export default function AleksPortfolio() {
           opacity: 0.7;
         }
 
-        .timeline-item:hover .year,
-        .timeline-item:active .year {
+        .timeline-item:hover .year {
           opacity: 1;
           transform: translateY(-2px);
         }
 
-        .timeline-text {
-          word-wrap: break-word;
-          overflow-wrap: break-word;
-          hyphens: auto;
-          max-width: 100%;
-          margin: 0;
-          font-size: clamp(0.75rem, 2.5vw, 0.85rem);
-          line-height: 1.5;
-          text-align: center;
-          color: rgba(255, 255, 255, 0.85);
-        }
-
         .weather-container {
           position: fixed;
-          top: clamp(1rem, 3vw, 1.5rem);
-          right: clamp(1rem, 3vw, 1.5rem);
+          top: 1.5rem;
+          right: 1.5rem;
           background: rgba(20, 20, 20, 0.8);
           border: 1px solid rgba(255, 255, 255, 0.15);
-          border-radius: clamp(1rem, 3vw, 1.5rem);
-          padding: clamp(0.4rem, 1.5vw, 0.6rem) clamp(0.6rem, 2vw, 0.8rem);
-          font-size: clamp(0.7rem, 2vw, 0.8rem);
+          border-radius: 1.5rem;
+          padding: 0.5rem 0.8rem;
+          font-size: 0.8rem;
           font-weight: 500;
           letter-spacing: 0.02em;
           color: rgba(255, 255, 255, 0.9);
@@ -764,40 +705,181 @@ export default function AleksPortfolio() {
           white-space: nowrap;
           cursor: pointer;
           z-index: 200;
+          width: auto;
+          height: auto;
+          overflow: hidden;
           display: flex;
           align-items: center;
           justify-content: center;
           opacity: 1;
           visibility: visible;
           box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-          min-width: clamp(2rem, 6vw, 2.5rem);
-          min-height: clamp(2rem, 6vw, 2.5rem);
+          min-width: 2.5rem;
+          min-height: 2.5rem;
         }
 
-        @media (max-width: 767px) {
-          .weather-container {
+        @media (max-width: 768px), (max-width: 820px) and (orientation: portrait) {
+          .weather-container,
+          .weather-container.loading,
+          .weather-container.pin-only,
+          .weather-container:hover,
+          .weather-container.pin-only:hover {
             display: none !important;
             visibility: hidden !important;
             opacity: 0 !important;
+            pointer-events: none !important;
+            position: absolute !important;
+            top: -9999px !important;
           }
+
+          .contact-form {
+            width: 95vw;
+            max-width: none;
+            margin: 1rem auto 0 auto;
+            padding: 1.2rem;
+          }
+
+          .contact-form .form-title {
+            font-size: 0.85rem;
+            margin-bottom: 1.2rem;
+          }
+
+          .contact-form input,
+          .contact-form textarea {
+            font-size: 0.85rem;
+          }
+
+          .contact-form textarea {
+            min-height: 80px;
+          }
+        }
+
+        .weather-container.pin-only .location-text {
+          display: block !important;
+          opacity: 1 !important;
+          visibility: visible !important;
+          width: auto !important;
+          overflow: visible !important;
+          margin-left: 0 !important;
+          margin-right: 0 !important;
+          transform: translateX(0) !important;
+          font-weight: 500 !important;
+          font-size: 0.9rem !important;
+          white-space: nowrap !important;
+        }
+
+        @media (max-width: 768px) {
+          .weather-container.pin-only .location-text {
+            font-size: 1rem !important;
+          }
+        }
+
+        .weather-container.loading {
+          width: auto;
+          padding: 0.5rem 0.8rem;
+        }
+
+        .weather-container.pin-only {
+          width: auto;
+          height: auto;
+          padding: 0.6rem 1.2rem;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+        }
+
+        .weather-container.pin-only .weather-content {
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          gap: 0.5rem !important;
+        }
+
+        .weather-container.pin-only .weather-content .location-pin {
+          display: block !important;
+          opacity: 1 !important;
+          visibility: visible !important;
+          width: auto !important;
+          height: auto !important;
+          overflow: visible !important;
+          color: rgba(255, 255, 255, 0.9) !important;
+          font-size: 1rem !important;
+          line-height: 1 !important;
+          z-index: 1000 !important;
+          position: relative !important;
+          margin: 0 !important;
+          flex-shrink: 0 !important;
+        }
+
+        .weather-container:hover {
+          background: rgba(20, 20, 20, 0.9);
+          border-color: rgba(255, 255, 255, 0.25);
+          transform: translateY(-2px);
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+          width: auto;
+          max-width: 350px;
+          padding: 0.6rem 1rem;
+        }
+
+        .weather-container:hover .time-separator {
+          display: block !important;
+          opacity: 1 !important;
+          transform: scale(1) !important;
+          visibility: visible !important;
+          width: 3px !important;
+          height: 3px !important;
+          background: rgba(255, 255, 255, 0.5) !important;
+          border-radius: 50% !important;
+          margin: 0 0.2rem !important;
+        }
+
+        .weather-container:hover .time-text {
+          display: block !important;
+          opacity: 1 !important;
+          transform: translateX(0) !important;
+          visibility: visible !important;
+          font-size: 0.65rem !important;
+          color: rgba(255, 255, 255, 0.7) !important;
+          width: auto !important;
+          overflow: visible !important;
         }
 
         .weather-content {
           display: flex;
           align-items: center;
-          gap: clamp(0.3rem, 1vw, 0.5rem);
+          gap: 0.4rem;
           transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .location-pin {
-          font-size: clamp(0.8rem, 2vw, 1rem);
+          font-size: 1rem;
           flex-shrink: 0;
           transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
           display: block;
         }
 
+        .weather-container.loading .location-pin {
+          display: none;
+        }
+
+        .weather-container.pin-only .location-pin {
+          display: block !important;
+          opacity: 1 !important;
+          width: auto !important;
+          overflow: visible !important;
+          color: red !important;
+          font-size: 1.5rem !important;
+        }
+
+        .weather-container:hover .location-pin {
+          display: block !important;
+          opacity: 1 !important;
+          width: auto !important;
+          overflow: visible !important;
+        }
+
         .location-emoji {
-          font-size: clamp(0.8rem, 2vw, 0.9rem);
+          font-size: 0.9rem;
           margin-left: 0;
           animation: none;
           flex-shrink: 0;
@@ -815,19 +897,19 @@ export default function AleksPortfolio() {
           overflow: visible;
         }
 
-        .location-emoji.finding-animation {
-          animation: pulse 1.5s ease-in-out infinite;
+        .weather-container.pin-only .location-emoji {
+          display: none !important;
+          opacity: 0 !important;
+          width: 0 !important;
+          overflow: hidden !important;
         }
 
-        @keyframes pulse {
-          0%, 100% { 
-            opacity: 0.8; 
-            transform: scale(1);
-          }
-          50% { 
-            opacity: 1; 
-            transform: scale(1.1);
-          }
+        .weather-container:hover .location-emoji {
+          display: none !important;
+          opacity: 0 !important;
+          width: 0 !important;
+          margin-left: 0 !important;
+          overflow: hidden !important;
         }
 
         .location-text {
@@ -838,7 +920,19 @@ export default function AleksPortfolio() {
           white-space: nowrap;
           width: auto;
           overflow: visible;
-          margin-left: clamp(0.1rem, 0.5vw, 0.2rem);
+          margin-left: 0.2rem;
+        }
+
+        .weather-container.loading .location-text {
+          opacity: 1;
+          transform: translateX(0);
+          width: auto;
+          overflow: visible;
+          margin-left: 0.2rem;
+        }
+
+        .location-text.loading {
+          position: relative;
         }
 
         .location-text.loading::after {
@@ -847,6 +941,28 @@ export default function AleksPortfolio() {
           width: 20px;
           text-align: left;
           animation: loadingDots 2s linear infinite;
+        }
+
+        .weather-container.pin-only .location-text {
+          display: block !important;
+          opacity: 1 !important;
+          visibility: visible !important;
+          width: auto !important;
+          overflow: visible !important;
+          margin-left: 0 !important;
+          margin-right: 0 !important;
+          transform: translateX(0) !important;
+          font-weight: 500 !important;
+          font-size: 0.8rem !important;
+          white-space: nowrap !important;
+        }
+
+        .weather-container:hover .location-text {
+          opacity: 1 !important;
+          transform: translateX(0) !important;
+          width: auto !important;
+          margin-left: 0.2rem !important;
+          overflow: visible !important;
         }
 
         @keyframes loadingDots {
@@ -861,19 +977,20 @@ export default function AleksPortfolio() {
           height: 3px;
           background: rgba(255, 255, 255, 0.5);
           border-radius: 50%;
-          margin: 0 clamp(0.1rem, 0.5vw, 0.2rem);
+          margin: 0 0.2rem;
           opacity: 0;
           transform: scale(0);
           transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .weather-container:hover .time-separator {
-          opacity: 1;
-          transform: scale(1);
+          display: block !important;
+          opacity: 1 !important;
+          transform: scale(1) !important;
         }
 
         .time-text {
-          font-size: clamp(0.6rem, 1.5vw, 0.7rem);
+          font-size: 0.65rem;
           color: rgba(255, 255, 255, 0.7);
           opacity: 0;
           transform: translateX(-10px);
@@ -881,22 +998,23 @@ export default function AleksPortfolio() {
         }
 
         .weather-container:hover .time-text {
-          opacity: 1;
-          transform: translateX(0);
+          display: block !important;
+          opacity: 1 !important;
+          transform: translateX(0) !important;
         }
 
         .contact-bar {
           position: fixed;
-          bottom: max(1.5rem, env(safe-area-inset-bottom));
+          bottom: var(--safe-area-bottom);
           left: 50%;
           transform: translateX(-50%) translateY(100%);
           width: auto;
-          max-width: clamp(16rem, 40vw, 20rem);
-          min-width: clamp(2.5rem, 8vw, 3rem);
-          height: clamp(2.5rem, 8vw, 3rem);
+          max-width: 20rem;
+          min-width: 3rem;
+          height: 3rem;
           background: rgba(20, 20, 20, 0.8);
           border: 1px solid rgba(255, 255, 255, 0.15);
-          border-radius: clamp(1.25rem, 4vw, 1.5rem);
+          border-radius: 1.5rem;
           backdrop-filter: blur(12px);
           z-index: 100;
           opacity: 0;
@@ -918,17 +1036,43 @@ export default function AleksPortfolio() {
           transform: translateX(-50%) translateY(0);
           opacity: 1;
           visibility: visible;
-          padding: clamp(0.2rem, 1vw, 0.3rem);
-          width: clamp(2.5rem, 8vw, 3rem);
-          height: clamp(2.5rem, 8vw, 3rem);
+          padding: 0.2rem;
+          width: 3rem;
+          height: 2.8rem;
+          min-width: 3rem;
+        }
+
+        .email-button::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+          transition: left 0.5s ease;
+        }
+
+        .email-button:hover::before {
+          left: 100%;
+        }
+
+        .email-button:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+          border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .email-button:hover .button-icon {
+          transform: translateX(2px);
         }
 
         .contact-content {
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: clamp(0.6rem, 2vw, 0.8rem);
-          transition: gap 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+          gap: 0.8rem;
+          transition: gap 3s cubic-bezier(0.23, 1, 0.32, 1);
           white-space: nowrap;
           opacity: 1;
         }
@@ -944,47 +1088,28 @@ export default function AleksPortfolio() {
           justify-content: center;
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           color: white;
-          padding: clamp(0.5rem, 2vw, 0.65rem);
-          border-radius: clamp(1.25rem, 4vw, 1.5rem);
+          padding: 0.65rem;
+          border-radius: 1.5rem;
           text-decoration: none;
           font-weight: 500;
-          font-size: clamp(0.7rem, 2vw, 0.85rem);
-          transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+          font-size: 0.85rem;
+          transition: all 3s cubic-bezier(0.23, 1, 0.32, 1);
           border: 1px solid rgba(255, 255, 255, 0.2);
           position: relative;
           overflow: hidden;
-          width: clamp(2.2rem, 7vw, 2.6rem);
-          height: clamp(2.2rem, 7vw, 2.4rem);
+          width: 2.6rem;
+          height: 2.4rem;
           cursor: pointer;
         }
 
-        .email-button::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: -100%;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-          transition: left 0.5s ease;
-        }
-
-        .email-button:hover::before,
-        .email-button:active::before {
-          left: 100%;
-        }
-
-        .email-button:hover,
-        .email-button:active {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
-          border-color: rgba(255, 255, 255, 0.3);
-        }
-
         .email-button.collapsed {
-          width: clamp(2.2rem, 7vw, 2.6rem);
-          height: clamp(2.2rem, 7vw, 2.4rem);
-          border-radius: clamp(1.1rem, 3.5vw, 1.3rem);
+          padding: 0.65rem;
+          width: 2.6rem;
+          height: 2.4rem;
+          display: flex !important;
+          justify-content: center !important;
+          align-items: center !important;
+          border-radius: 1.3rem;
         }
 
         .button-icon {
@@ -1000,12 +1125,12 @@ export default function AleksPortfolio() {
 
         .social-divider {
           width: 1px;
-          height: clamp(1.5rem, 5vw, 1.8rem);
+          height: 1.8rem;
           background: rgba(255, 255, 255, 0.2);
           transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
           opacity: 1;
           transform: scaleX(1);
-          margin: 0 clamp(0.3rem, 1vw, 0.4rem);
+          margin: 0 0.4rem;
         }
 
         .social-divider.collapsed {
@@ -1017,12 +1142,12 @@ export default function AleksPortfolio() {
 
         .social-links {
           display: flex;
-          gap: clamp(0.6rem, 2vw, 0.8rem);
+          gap: 0.8rem;
           transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
           opacity: 1;
           transform: scale(1);
           width: auto;
-          max-width: clamp(50px, 15vw, 60px);
+          max-width: 60px;
           overflow: hidden;
         }
 
@@ -1039,20 +1164,20 @@ export default function AleksPortfolio() {
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: clamp(0.5rem, 2vw, 0.65rem);
-          border-radius: clamp(1.25rem, 4vw, 1.5rem);
+          padding: 0.65rem;
+          border-radius: 1.5rem;
           background: rgba(255, 255, 255, 0.08);
           border: 1px solid rgba(255, 255, 255, 0.2);
           color: rgba(255, 255, 255, 0.9);
           text-decoration: none;
           font-weight: 500;
-          font-size: clamp(0.7rem, 2vw, 0.85rem);
+          font-size: 0.85rem;
           white-space: nowrap;
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           position: relative;
           overflow: hidden;
-          width: clamp(2.2rem, 7vw, 2.6rem);
-          height: clamp(2.2rem, 7vw, 2.4rem);
+          width: 2.6rem;
+          height: 2.4rem;
         }
 
         .social-icon::before {
@@ -1063,19 +1188,17 @@ export default function AleksPortfolio() {
           width: 0;
           height: 0;
           background: rgba(255, 255, 255, 0.15);
-          border-radius: clamp(1.25rem, 4vw, 1.5rem);
+          border-radius: 1.5rem;
           transform: translate(-50%, -50%);
           transition: all 0.3s ease;
         }
 
-        .social-icon:hover::before,
-        .social-icon:active::before {
+        .social-icon:hover::before {
           width: 100%;
           height: 100%;
         }
 
-        .social-icon:hover,
-        .social-icon:active {
+        .social-icon:hover {
           transform: translateY(-3px);
           border-color: rgba(255, 255, 255, 0.4);
           background: rgba(255, 255, 255, 0.12);
@@ -1086,26 +1209,161 @@ export default function AleksPortfolio() {
           color: #0077b5;
         }
 
-        .linkedin-icon:hover,
-        .linkedin-icon:active {
+        .linkedin-icon:hover {
           color: #0077b5;
           border-color: rgba(0, 119, 181, 0.3);
           background: rgba(0, 119, 181, 0.1);
         }
 
+        @media (max-width: 640px) {
+          .contact-bar {
+            bottom: 1.5rem;
+            padding: 0.6rem 1.2rem;
+          }
+
+          .contact-bar.collapsed {
+            padding: 0.4rem;
+            width: 3.6rem;
+            height: 2.8rem;
+            min-width: 3.6rem;
+          }
+
+          .email-button {
+            padding: 0.55rem 1.1rem;
+            font-size: 0.8rem;
+            border-radius: 1.5rem;
+          }
+
+          .email-button.collapsed {
+            padding: 0.35rem 0.5rem;
+            width: 2.8rem;
+            height: 2rem;
+            border-radius: 1.5rem;
+          }
+
+          .social-icon {
+            padding: 0.55rem 1.1rem;
+            font-size: 0.8rem;
+            border-radius: 1.5rem;
+          }
+
+          .social-divider {
+            height: 1.6rem;
+          }
+        }
+
+        .social-container {
+          display: none;
+        }
+
+        .location-emoji.finding-animation {
+          animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+          0%, 100% { 
+            opacity: 0.8; 
+            transform: scale(1);
+          }
+          50% { 
+            opacity: 1; 
+            transform: scale(1.1);
+          }
+        }
+
+        .weather-container.pin-only .weather-content {
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+        }
+
+        .weather-container.pin-only .weather-content .location-pin {
+          display: block !important;
+          opacity: 1 !important;
+          visibility: visible !important;
+          width: auto !important;
+          height: auto !important;
+          overflow: visible !important;
+          color: rgba(255, 255, 255, 0.9) !important;
+          font-size: 1rem !important;
+          line-height: 1 !important;
+          z-index: 1000 !important;
+          position: relative !important;
+        }
+
+        .weather-container.pin-only .location-emoji {
+          display: none !important;
+          opacity: 0 !important;
+          width: 0 !important;
+          overflow: hidden !important;
+        }
+
+        .weather-container.pin-only .time-separator {
+          display: block !important;
+          opacity: 0 !important;
+          visibility: hidden !important;
+          width: 0 !important;
+          margin: 0 !important;
+          transform: scaleX(0);
+          transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .weather-container.pin-only .time-text {
+          display: block !important;
+          opacity: 0 !important;
+          visibility: hidden !important;
+          max-width: 0 !important;
+          overflow: hidden !important;
+          white-space: nowrap;
+          transform: translateX(-20px);
+          transition: all 0.9s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .weather-container.pin-only:hover .time-separator {
+          opacity: 1 !important;
+          visibility: visible !important;
+          width: 3px !important;
+          height: 3px !important;
+          background: rgba(255, 255, 255, 0.5) !important;
+          border-radius: 50% !important;
+          margin: 0 0.4rem !important;
+          transform: scaleX(1) !important;
+          transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1) 0.3s;
+        }
+
+        .weather-container.pin-only:hover .time-text {
+          opacity: 1 !important;
+          visibility: visible !important;
+          max-width: 100px !important;
+          overflow: visible !important;
+          font-size: 0.75rem !important;
+          color: rgba(255, 255, 255, 0.8) !important;
+          transform: translateX(0) !important;
+          transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1) 0.4s;
+        }
+
+        .weather-container.pin-only:hover .location-text {
+          display: block !important;
+          opacity: 1 !important;
+          visibility: visible !important;
+          width: auto !important;
+          overflow: visible !important;
+          margin-left: 0.5rem !important;
+        }
+
         .contact-form {
           opacity: 0;
           visibility: hidden;
-          width: 90%;
-          max-width: 26rem;
-          margin: 0.3rem auto 0.5rem auto;
-          padding: 0.6rem 0.8rem;
+          width: 92vw;
+          max-width: 32rem;
+          margin: 1.5rem auto 3rem auto;
+          padding: 1.5rem;
           background: rgba(255, 255, 255, 0.03);
           border: 1px solid rgba(255, 255, 255, 0.12);
-          border-radius: 6px;
+          border-radius: 12px;
           backdrop-filter: blur(20px);
           transition: all 1s cubic-bezier(0.23, 1, 0.32, 1);
-          transform: translateY(10px);
+          transform: translateY(30px);
           box-sizing: border-box;
         }
 
@@ -1116,34 +1374,24 @@ export default function AleksPortfolio() {
         }
 
         .contact-form .form-title {
-          font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+          font-size: 0.9rem;
           color: rgba(255, 255, 255, 0.4);
           text-transform: uppercase;
           letter-spacing: 0.1em;
-          margin-bottom: clamp(1rem, 3vw, 1.5rem);
-          text-align: center;
-          font-weight: 500;
-        }
-
-        .contact-form .form-title {
-          font-size: 0.8rem;
-          color: rgba(255, 255, 255, 0.4);
-          text-transform: uppercase;
-          letter-spacing: 0.1em;
-          margin-bottom: 0.8rem;
+          margin-bottom: 1.5rem;
           text-align: center;
           font-weight: 500;
         }
 
         .contact-form .form-group {
-          margin-bottom: 0.6rem;
+          margin-bottom: 1.2rem;
         }
 
         .contact-form label {
           display: block;
-          font-size: 0.65rem;
+          font-size: 0.75rem;
           color: rgba(255, 255, 255, 0.6);
-          margin-bottom: 0.25rem;
+          margin-bottom: 0.5rem;
           font-weight: 500;
           letter-spacing: 0.02em;
         }
@@ -1151,12 +1399,12 @@ export default function AleksPortfolio() {
         .contact-form input,
         .contact-form textarea {
           width: 100%;
-          padding: 0.5rem 0.7rem;
+          padding: 0.8rem 1rem;
           background: rgba(255, 255, 255, 0.05);
           border: 1px solid rgba(255, 255, 255, 0.15);
-          border-radius: 4px;
+          border-radius: 8px;
           color: rgba(255, 255, 255, 0.9);
-          font-size: 0.7rem;
+          font-size: 0.8rem;
           font-family: inherit;
           transition: all 0.3s ease;
           box-sizing: border-box;
@@ -1177,18 +1425,18 @@ export default function AleksPortfolio() {
         }
 
         .contact-form textarea {
-          min-height: 45px;
-          max-height: 80px;
+          min-height: 100px;
+          max-height: 150px;
         }
 
         .contact-form .submit-button {
           width: 100%;
-          padding: 0.6rem 1rem;
+          padding: 0.9rem 1.5rem;
           background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
           border: 1px solid rgba(255, 255, 255, 0.2);
-          border-radius: 4px;
+          border-radius: 8px;
           color: rgba(255, 255, 255, 0.9);
-          font-size: 0.7rem;
+          font-size: 0.8rem;
           font-weight: 500;
           letter-spacing: 0.02em;
           cursor: pointer;
@@ -1197,8 +1445,7 @@ export default function AleksPortfolio() {
           font-family: inherit;
         }
 
-        .contact-form .submit-button:hover,
-        .contact-form .submit-button:active {
+        .contact-form .submit-button:hover {
           background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08));
           border-color: rgba(255, 255, 255, 0.3);
           transform: translateY(-1px);
@@ -1211,11 +1458,17 @@ export default function AleksPortfolio() {
           transform: none;
         }
 
+        .contact-form .submit-button:disabled:hover {
+          transform: none;
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+          border-color: rgba(255, 255, 255, 0.2);
+        }
+
         .form-message {
-          padding: clamp(0.7rem, 2vw, 0.8rem) clamp(0.8rem, 2.5vw, 1rem);
-          border-radius: clamp(5px, 1.5vw, 6px);
-          margin-bottom: clamp(0.8rem, 2vw, 1rem);
-          font-size: clamp(0.75rem, 2vw, 0.8rem);
+          padding: 0.8rem 1rem;
+          border-radius: 6px;
+          margin-bottom: 1rem;
+          font-size: 0.8rem;
           text-align: center;
           transition: all 0.3s ease;
         }
@@ -1232,100 +1485,44 @@ export default function AleksPortfolio() {
           color: rgba(239, 68, 68, 0.9);
         }
 
-        /* Touch targets for mobile */
-        @media (max-width: 767px) {
-          .expand-button,
-          .email-button,
-          .social-icon,
-          .timeline-item {
-            min-width: 44px;
-            min-height: 44px;
-          }
-          
+        @media (min-width: 640px) {
           .contact-form {
-            margin: 0.2rem auto 0.3rem auto;
-            padding: 0.5rem 0.6rem;
-            width: 88%;
-            max-width: 24rem;
-          }
-
-          .content-section {
-            margin: 0.3rem auto;
-            padding: 0.6rem;
-            line-height: 1.25;
-          }
-
-          .main-content {
-            padding-bottom: 0.3rem;
+            padding: 2rem;
+            max-width: 28rem;
+            width: 80%;
           }
 
           .contact-form .form-title {
-            font-size: 0.75rem;
-            margin-bottom: 0.6rem;
+            font-size: 1rem;
           }
 
-          .contact-form .form-group {
-            margin-bottom: 0.5rem;
-          }
-
-          .contact-form textarea {
-            min-height: 40px;
-            max-height: 70px;
+          .contact-form label {
+            font-size: 0.8rem;
           }
 
           .contact-form input,
           .contact-form textarea {
-            padding: 0.45rem 0.6rem;
-            font-size: 0.65rem;
+            font-size: 0.85rem;
+            padding: 0.9rem 1.2rem;
           }
 
           .contact-form .submit-button {
-            padding: 0.55rem 0.9rem;
-            font-size: 0.65rem;
+            font-size: 0.85rem;
+            padding: 1rem 1.8rem;
           }
         }
 
-        /* Landscape phone adjustments */
-        @media (max-width: 896px) and (orientation: landscape) {
-          .main-content {
-            padding: 0 2rem;
-          }
-          
-          .content-section {
-            margin: 0.5rem auto;
-            padding: 0.8rem;
-          }
-        }
-
-        /* Tablet adjustments */
-        @media (min-width: 768px) and (max-width: 1023px) {
-          .desktop-text {
-            font-size: clamp(1.1rem, 3vw, 1.3rem);
-          }
-          
-          .content-section {
-            max-width: 28rem;
-            width: 85%;
-          }
-        }
-
-        /* Large screen adjustments */
-        @media (min-width: 1200px) {
-          .desktop-text {
-            font-size: 1.4rem;
-            max-width: 800px;
-          }
-          
-          .content-section {
-            max-width: 34rem;
-            width: 70%;
+        @media (min-width: 1024px) {
+          .contact-form {
+            max-width: 32rem;
+            width: 75%;
           }
         }
       `}</style>
 
       <div className="top-gradient" />
 
-      <div className="main-content" style={getContainerStyle()}>
+      <div className={mainContentClass}>
         <div className="mobile-text">
           <p>Hi, I'm Aleks — I turn ambitious ideas into reality through strategic execution.</p>
         </div>
@@ -1430,23 +1627,21 @@ export default function AleksPortfolio() {
         </div>
       </div>
 
-      {!screenSize.isMobile && (
-        <div className={`weather-container ${isLoading ? 'loading' : 'pin-only'}`}>
-          <div className="weather-content">
-            <span className="location-pin">📍</span>
-            <span className={`location-emoji ${isLoading ? 'finding-animation' : ''}`}>
-              {isLoading ? '🔍' : weatherEmoji}
-            </span>
-            <span className={`location-text ${isLoading ? 'loading' : ''}`}>{location}</span>
-            {currentTime && !isLoading && (
-              <>
-                <span className="time-separator"></span>
-                <span className="time-text">{currentTime}</span>
-              </>
-            )}
-          </div>
+      <div className={`weather-container ${isLoading ? 'loading' : 'pin-only'}`}>
+        <div className="weather-content">
+          <span className="location-pin">📍</span>
+          <span className={`location-emoji ${isLoading ? 'finding-animation' : ''}`}>
+            {isLoading ? '🔍' : weatherEmoji}
+          </span>
+          <span className={`location-text ${isLoading ? 'loading' : ''}`}>{location}</span>
+          {currentTime && !isLoading && (
+            <>
+              <span className="time-separator"></span>
+              <span className="time-text">{currentTime}</span>
+            </>
+          )}
         </div>
-      )}
+      </div>
 
       {contactDiscovered && expansionLevel < 4 && (
         <div className={`contact-bar ${!contactExpanded ? 'collapsed' : ''}`}>
@@ -1478,4 +1673,4 @@ export default function AleksPortfolio() {
       )}
     </div>
   );
-}
+} 
