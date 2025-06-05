@@ -182,7 +182,7 @@ export default function AleksPortfolio() {
 
   const handleTouchEnd = (event: TouchEvent) => {
     const now = Date.now();
-    const touchDelay = 1200;
+    const touchDelay = 800; // Reduced delay for mobile responsiveness
     
     if (isAnimating.current || now - lastWheelTime.current < touchDelay) {
       return;
@@ -191,23 +191,26 @@ export default function AleksPortfolio() {
     const touchEndY = event.changedTouches[0].clientY;
     const touchDuration = now - touchStartTime.current;
     const touchDistance = Math.abs(touchEndY - touchStartY.current);
+    const deltaY = touchStartY.current - touchEndY;
     
-    // Only process swipes that are:
-    // - Fast enough (under 800ms)
-    // - Long enough (at least 50px)
-    // - Primarily vertical (not detecting horizontal swipes)
-    if (touchDuration > 800 || touchDistance < 50) {
+    // More lenient thresholds for mobile:
+    // - Longer duration allowed (under 1200ms)
+    // - Shorter distance required (at least 30px)
+    if (touchDuration > 1200 || touchDistance < 30) {
       return;
     }
 
-    const isSwipeDown = touchStartY.current > touchEndY;
+    // Fixed swipe direction logic:
+    // - Positive deltaY = swipe up (finger moves up, content moves down - expand)
+    // - Negative deltaY = swipe down (finger moves down, content moves up - collapse)
+    const isSwipeUp = deltaY > 0;
     
     isAnimating.current = true;
     lastWheelTime.current = now;
 
-    if (isSwipeDown && expansionLevel < 4) {
+    if (isSwipeUp && expansionLevel < 4) {
       toggleContent(true);
-    } else if (!isSwipeDown && expansionLevel > 0) {
+    } else if (!isSwipeUp && expansionLevel > 0) {
       toggleContent(false);
     } else {
       isAnimating.current = false;
@@ -360,6 +363,10 @@ export default function AleksPortfolio() {
           margin: 0;
           height: 100vh;
           overflow: hidden;
+          touch-action: none;
+          -webkit-touch-callout: none;
+          -webkit-user-select: none;
+          user-select: none;
         }
 
         .top-gradient {
