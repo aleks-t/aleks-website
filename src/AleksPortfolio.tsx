@@ -416,9 +416,9 @@ export default function AleksPortfolio() {
           text-align: center;
           transition: transform 1.8s cubic-bezier(0.23, 1, 0.32, 1);
           will-change: transform;
-          margin-top: 42vh;
+          margin-top: 45vh;
           padding: 0;
-          padding-bottom: 12vh;
+          padding-bottom: 20vh;
           max-height: none;
           overflow: visible;
           box-sizing: border-box;
@@ -426,20 +426,20 @@ export default function AleksPortfolio() {
         }
 
         .main-content.expanded-1 {
-          transform: translateY(-15vh);
+          transform: translateY(calc(-10vh - 5vw));
         }
 
         .main-content.expanded-2 {
-          transform: translateY(-25vh);
+          transform: translateY(calc(-20vh - 8vw));
         }
 
         .main-content.expanded-3 {
-          transform: translateY(-35vh);
+          transform: translateY(calc(-30vh - 10vw));
         }
 
         .main-content.expanded-4 {
-          transform: translateY(-50vh);
-          padding-bottom: 25vh;
+          transform: translateY(calc(-35vh - 15vw));
+          padding-bottom: 40vh;
         }
 
         .desktop-text {
@@ -1450,7 +1450,7 @@ export default function AleksPortfolio() {
           visibility: hidden;
           width: 92vw;
           max-width: 32rem;
-          margin: 1.5rem auto 5rem auto;
+          margin: 2rem auto 3rem auto;
           padding: 1.8rem 1.2rem;
           background: rgba(255, 255, 255, 0.03);
           border: 1px solid rgba(255, 255, 255, 0.12);
@@ -1579,50 +1579,53 @@ export default function AleksPortfolio() {
           color: rgba(239, 68, 68, 0.9);
         }
 
-        @media (min-width: 640px) {
-          .contact-form {
-            padding: 2rem;
-            max-width: 28rem;
-            width: 80%;
-          }
-
-          .contact-form .form-title {
-            font-size: 1rem;
-          }
-
-          .contact-form label {
-            font-size: 0.8rem;
-          }
-
-          .contact-form input,
-          .contact-form textarea {
-            font-size: 0.85rem;
-            padding: 0.9rem 1.2rem;
-          }
-
-          .contact-form .submit-button {
-            font-size: 0.85rem;
-            padding: 1rem 1.8rem;
-          }
-        }
-
-        @media (min-width: 1024px) {
-          .contact-form {
-            max-width: 32rem;
-            width: 75%;
-          }
-        }
-
         @media (max-width: 768px) {
+          .main-content {
+            margin-top: 40vh;
+            padding-bottom: 25vh;
+          }
+
+          .main-content.expanded-1 {
+            transform: translateY(calc(-8vh - 3vw));
+          }
+
+          .main-content.expanded-2 {
+            transform: translateY(calc(-15vh - 5vw));
+          }
+
+          .main-content.expanded-3 {
+            transform: translateY(calc(-22vh - 8vw));
+          }
+
           .main-content.expanded-4 {
-            transform: translateY(-45vh);
-            padding-bottom: 30vh;
+            transform: translateY(calc(-25vh - 12vw));
+            padding-bottom: 50vh;
           }
 
           .contact-form {
             width: 90vw;
-            margin: 1rem auto 8rem auto;
+            margin: 1.5rem auto 2rem auto;
             padding: 1.5rem 1rem;
+          }
+        }
+
+        /* Tablet specific adjustments */
+        @media (min-width: 769px) and (max-width: 1024px) {
+          .main-content.expanded-1 {
+            transform: translateY(calc(-12vh - 4vw));
+          }
+
+          .main-content.expanded-2 {
+            transform: translateY(calc(-22vh - 6vw));
+          }
+
+          .main-content.expanded-3 {
+            transform: translateY(calc(-32vh - 8vw));
+          }
+
+          .main-content.expanded-4 {
+            transform: translateY(calc(-38vh - 12vw));
+            padding-bottom: 35vh;
           }
         }
       `}</style>
