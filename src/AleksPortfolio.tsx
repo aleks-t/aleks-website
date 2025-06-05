@@ -175,26 +175,26 @@ export default function AleksPortfolio() {
     event.preventDefault();
   };
 
-  const handleTouchStart = (event: TouchEvent) => {
-    console.log('Touch start detected', { y: event.touches[0].clientY, timestamp: Date.now() });
+  const handleTouchStartReact = (event: React.TouchEvent) => {
+    console.log('React Touch start detected', { y: event.touches[0].clientY, timestamp: Date.now() });
     touchStartY.current = event.touches[0].clientY;
     touchStartTime.current = Date.now();
     // Prevent default to stop iOS bounce/scroll
     event.preventDefault();
   };
 
-  const handleTouchEnd = (event: TouchEvent) => {
+  const handleTouchEndReact = (event: React.TouchEvent) => {
     const now = Date.now();
     const touchDelay = 600; // Faster response for mobile
     
-    console.log('Touch end detected', { 
+    console.log('React Touch end detected', { 
       y: event.changedTouches[0].clientY, 
       startY: touchStartY.current,
       duration: now - touchStartTime.current 
     });
 
     if (isAnimating.current || now - lastWheelTime.current < touchDelay) {
-      console.log('Touch blocked - animating or too soon');
+      console.log('React Touch blocked - animating or too soon');
       return;
     }
 
@@ -203,13 +203,13 @@ export default function AleksPortfolio() {
     const touchDistance = Math.abs(touchEndY - touchStartY.current);
     const deltaY = touchStartY.current - touchEndY;
     
-    console.log('Touch analysis', { touchDuration, touchDistance, deltaY, expansionLevel });
+    console.log('React Touch analysis', { touchDuration, touchDistance, deltaY, expansionLevel });
     
     // Very lenient thresholds for iOS:
     // - Allow up to 1500ms duration
     // - Require only 20px minimum distance
     if (touchDuration > 1500 || touchDistance < 20) {
-      console.log('Touch rejected - duration or distance threshold');
+      console.log('React Touch rejected - duration or distance threshold');
       return;
     }
 
@@ -218,19 +218,19 @@ export default function AleksPortfolio() {
     // - Negative deltaY = swipe down (finger moves down) = collapse content
     const isSwipeUp = deltaY > 0;
     
-    console.log('Touch accepted', { isSwipeUp, expansionLevel });
+    console.log('React Touch accepted', { isSwipeUp, expansionLevel });
     
     isAnimating.current = true;
     lastWheelTime.current = now;
 
     if (isSwipeUp && expansionLevel < 4) {
-      console.log('Expanding content');
+      console.log('React Expanding content');
       toggleContent(true);
     } else if (!isSwipeUp && expansionLevel > 0) {
-      console.log('Collapsing content');
+      console.log('React Collapsing content');
       toggleContent(false);
     } else {
-      console.log('No action - already at limit');
+      console.log('React No action - already at limit');
       isAnimating.current = false;
       return;
     }
@@ -341,26 +341,14 @@ export default function AleksPortfolio() {
     const timeInterval = setInterval(updateTime, 60000);
     
     const handleWheelEvent = (e: WheelEvent) => handleWheel(e);
-    const handleTouchStartEvent = (e: TouchEvent) => handleTouchStart(e);
-    const handleTouchEndEvent = (e: TouchEvent) => handleTouchEnd(e);
-    const handleTouchMoveEvent = (e: TouchEvent) => {
-      // Prevent iOS scroll bounce
-      e.preventDefault();
-    };
     
-    // Use document.body for better iOS compatibility
+    // Use document.body for better iOS compatibility - only wheel events
     document.body.addEventListener('wheel', handleWheelEvent, { passive: false });
-    document.body.addEventListener('touchstart', handleTouchStartEvent, { passive: false });
-    document.body.addEventListener('touchend', handleTouchEndEvent, { passive: false });
-    document.body.addEventListener('touchmove', handleTouchMoveEvent, { passive: false });
     
     handleExpansion();
     
     return () => {
       document.body.removeEventListener('wheel', handleWheelEvent);
-      document.body.removeEventListener('touchstart', handleTouchStartEvent);
-      document.body.removeEventListener('touchend', handleTouchEndEvent);
-      document.body.removeEventListener('touchmove', handleTouchMoveEvent);
       clearInterval(timeInterval);
     };
   }, [expansionLevel]);
@@ -369,7 +357,12 @@ export default function AleksPortfolio() {
   const firstExpandClass = `expand-button ${expansionLevel > 0 ? 'expanded' : ''}`;
 
   return (
-    <div className="min-h-screen bg-black text-white overflow-hidden relative flex flex-col items-center" style={{ height: '100vh', maxHeight: '100vh' }}>
+    <div 
+      className="min-h-screen bg-black text-white overflow-hidden relative flex flex-col items-center" 
+      style={{ height: '100vh', maxHeight: '100vh' }}
+      onTouchStart={handleTouchStartReact}
+      onTouchEnd={handleTouchEndReact}
+    >
       <style>{`
         :root {
           --base-unit: calc(1.5vh + 1.5vw);
