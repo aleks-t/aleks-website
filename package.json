@@ -1,0 +1,34 @@
+{
+  "name": "aleks-portfolio",
+  "version": "1.0.0",
+  "description": "Interactive React portfolio for Aleks",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext js,jsx,ts,tsx",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@vitejs/plugin-react": "^4.0.0",
+    "gh-pages": "^6.3.0",
+    "typescript": "^5.0.0",
+    "vite": "^4.4.0"
+  },
+  "keywords": [
+    "portfolio",
+    "react",
+    "typescript",
+    "interactive"
+  ],
+  "author": "Aleks",
+  "license": "MIT"
+}
