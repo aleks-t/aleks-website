@@ -416,30 +416,63 @@ export default function AleksPortfolio() {
           text-align: center;
           transition: transform 1.8s cubic-bezier(0.23, 1, 0.32, 1);
           will-change: transform;
-          margin-top: 50vh;
-          padding: 0;
-          padding-bottom: 100vh;
+          margin-top: 0;
+          padding: 50vh 0;
           max-height: none;
           overflow: visible;
           box-sizing: border-box;
-          transform-origin: center top;
+          min-height: 500vh;
         }
 
-        /* Dynamic centering - each level centers its primary content */
+        /* Simple full-viewport slides */
         .main-content.expanded-1 {
-          transform: translateY(calc(-50vh + 20vh));
+          transform: translateY(-100vh);
         }
 
         .main-content.expanded-2 {
-          transform: translateY(calc(-50vh + 10vh));
+          transform: translateY(-200vh);
         }
 
         .main-content.expanded-3 {
-          transform: translateY(calc(-50vh - 10vh));
+          transform: translateY(-300vh);
         }
 
         .main-content.expanded-4 {
-          transform: translateY(calc(-50vh - 30vh));
+          transform: translateY(-400vh);
+        }
+
+        /* Each content section gets its own "page" */
+        .content-section {
+          opacity: 0;
+          visibility: hidden;
+          width: 90vw;
+          max-width: 32rem;
+          margin: 0 auto;
+          padding: 2rem 1.5rem;
+          color: rgba(255, 255, 255, 0.75);
+          transition: opacity 1s ease, visibility 1s ease, transform 1s ease;
+          min-height: 60vh;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          word-wrap: break-word;
+          overflow-wrap: break-word;
+          hyphens: auto;
+          box-sizing: border-box;
+          font-size: clamp(0.85rem, 3.5vw, 0.9rem);
+          line-height: 1.5;
+          text-align: center;
+          background: rgba(255, 255, 255, 0.02);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 6px;
+          backdrop-filter: blur(20px);
+          transform: translateY(20px);
+        }
+
+        .content-section.visible {
+          opacity: 1;
+          visibility: visible;
+          transform: translateY(0);
         }
 
         .desktop-text {
@@ -611,103 +644,6 @@ export default function AleksPortfolio() {
           opacity: 0.4;
           border-color: rgba(255, 255, 255, 0.2);
           background: rgba(255, 255, 255, 0.02);
-        }
-
-        .content-section {
-          opacity: 0;
-          visibility: hidden;
-          width: 90vw;
-          max-width: 32rem;
-          margin: 5vh auto;
-          padding: 0.8rem 1rem;
-          color: rgba(255, 255, 255, 0.75);
-          transition: opacity 1s ease, visibility 1s ease, transform 1s ease;
-          min-height: auto;
-          word-wrap: break-word;
-          overflow-wrap: break-word;
-          hyphens: auto;
-          box-sizing: border-box;
-          font-size: clamp(0.85rem, 3.5vw, 0.9rem);
-          line-height: 1.5;
-          text-align: center;
-          background: rgba(255, 255, 255, 0.02);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: 6px;
-          backdrop-filter: blur(20px);
-          transform: translateY(20px);
-        }
-
-        @media (min-width: 640px) {
-          .content-section {
-            max-width: 28rem;
-            width: 80%;
-            padding: 0.9rem 1.2rem;
-            font-size: 0.8rem;
-            line-height: 1.45;
-            margin: 1.2rem auto;
-          }
-
-          .timeline-text {
-            font-size: 0.8rem;
-            line-height: 1.45;
-          }
-
-          .section-hint {
-            font-size: 0.9rem;
-          }
-        }
-
-        @media (min-width: 1024px) {
-          .content-section {
-            max-width: 32rem;
-            width: 75%;
-            padding: 1rem 1.4rem;
-            font-size: 0.85rem;
-            line-height: 1.5;
-            margin: 1.5rem auto;
-          }
-
-          .timeline-text {
-            font-size: 0.85rem;
-            line-height: 1.5;
-          }
-
-          .section-hint {
-            font-size: 0.95rem;
-          }
-        }
-
-        .content-section.visible {
-          opacity: 1;
-          visibility: visible;
-          transform: translateY(0);
-        }
-
-        .content-section p {
-          margin: 0;
-          text-align: center;
-        }
-
-        .timeline-text {
-          word-wrap: break-word;
-          overflow-wrap: break-word;
-          hyphens: auto;
-          max-width: 100%;
-          margin: 0;
-          font-size: clamp(0.8rem, 3.5vw, 0.85rem);
-          line-height: 1.5;
-          text-align: center;
-          color: rgba(255, 255, 255, 0.85);
-        }
-
-        .metric {
-          color: rgba(255, 255, 255, 0.9);
-          font-weight: 600;
-        }
-
-        .highlight {
-          color: rgba(255, 255, 255, 0.95);
-          font-weight: 500;
         }
 
         .section-hint {
@@ -1450,7 +1386,7 @@ export default function AleksPortfolio() {
           visibility: hidden;
           width: 90vw;
           max-width: 32rem;
-          margin: 10vh auto 5vh auto;
+          margin: 0 auto;
           padding: 2rem 1.5rem;
           background: rgba(255, 255, 255, 0.03);
           border: 1px solid rgba(255, 255, 255, 0.12);
@@ -1459,6 +1395,10 @@ export default function AleksPortfolio() {
           transition: all 1s cubic-bezier(0.23, 1, 0.32, 1);
           transform: translateY(30px);
           box-sizing: border-box;
+          min-height: 70vh;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
         }
 
         .contact-form.visible {
@@ -1609,6 +1549,33 @@ export default function AleksPortfolio() {
           .contact-form {
             width: 70%;
           }
+        }
+
+        .content-section p {
+          margin: 0;
+          text-align: center;
+        }
+
+        .timeline-text {
+          word-wrap: break-word;
+          overflow-wrap: break-word;
+          hyphens: auto;
+          max-width: 100%;
+          margin: 0;
+          font-size: clamp(0.8rem, 3.5vw, 0.85rem);
+          line-height: 1.5;
+          text-align: center;
+          color: rgba(255, 255, 255, 0.85);
+        }
+
+        .metric {
+          color: rgba(255, 255, 255, 0.9);
+          font-weight: 600;
+        }
+
+        .highlight {
+          color: rgba(255, 255, 255, 0.95);
+          font-weight: 500;
         }
       `}</style>
 
