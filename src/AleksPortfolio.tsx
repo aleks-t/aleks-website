@@ -19,6 +19,8 @@ export default function AleksPortfolio() {
   const lastWheelTime = useRef(0);
   const isAnimating = useRef(false);
   const timelineRef = useRef(null);
+  const touchStartY = useRef(0);
+  const touchStartTime = useRef(0);
 
   const CONFIG = {
     ZIP_CODE: '94132',
@@ -173,6 +175,52 @@ export default function AleksPortfolio() {
     event.preventDefault();
   };
 
+  const handleTouchStart = (event: TouchEvent) => {
+    touchStartY.current = event.touches[0].clientY;
+    touchStartTime.current = Date.now();
+  };
+
+  const handleTouchEnd = (event: TouchEvent) => {
+    const now = Date.now();
+    const touchDelay = 1200;
+    
+    if (isAnimating.current || now - lastWheelTime.current < touchDelay) {
+      return;
+    }
+
+    const touchEndY = event.changedTouches[0].clientY;
+    const touchDuration = now - touchStartTime.current;
+    const touchDistance = Math.abs(touchEndY - touchStartY.current);
+    
+    // Only process swipes that are:
+    // - Fast enough (under 800ms)
+    // - Long enough (at least 50px)
+    // - Primarily vertical (not detecting horizontal swipes)
+    if (touchDuration > 800 || touchDistance < 50) {
+      return;
+    }
+
+    const isSwipeDown = touchStartY.current > touchEndY;
+    
+    isAnimating.current = true;
+    lastWheelTime.current = now;
+
+    if (isSwipeDown && expansionLevel < 4) {
+      toggleContent(true);
+    } else if (!isSwipeDown && expansionLevel > 0) {
+      toggleContent(false);
+    } else {
+      isAnimating.current = false;
+      return;
+    }
+
+    setTimeout(() => {
+      isAnimating.current = false;
+    }, 700);
+    
+    event.preventDefault();
+  };
+
   const handleTimelineMove = (e: React.MouseEvent) => {
     if (!timelineRef.current) return;
     
@@ -271,12 +319,19 @@ export default function AleksPortfolio() {
     const timeInterval = setInterval(updateTime, 60000);
     
     const handleWheelEvent = (e: WheelEvent) => handleWheel(e);
+    const handleTouchStartEvent = (e: TouchEvent) => handleTouchStart(e);
+    const handleTouchEndEvent = (e: TouchEvent) => handleTouchEnd(e);
+    
     window.addEventListener('wheel', handleWheelEvent, { passive: false });
+    window.addEventListener('touchstart', handleTouchStartEvent, { passive: false });
+    window.addEventListener('touchend', handleTouchEndEvent, { passive: false });
     
     handleExpansion();
     
     return () => {
       window.removeEventListener('wheel', handleWheelEvent);
+      window.removeEventListener('touchstart', handleTouchStartEvent);
+      window.removeEventListener('touchend', handleTouchEndEvent);
       clearInterval(timeInterval);
     };
   }, [expansionLevel]);
