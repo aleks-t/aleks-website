@@ -416,29 +416,29 @@ export default function AleksPortfolio() {
           text-align: center;
           transition: transform 1.8s cubic-bezier(0.23, 1, 0.32, 1);
           will-change: transform;
-          margin-top: 0;
-          padding: 50vh 0;
+          margin-top: 42vh;
+          padding: 0;
+          padding-bottom: 20vh;
           max-height: none;
           overflow: visible;
           box-sizing: border-box;
-          min-height: 500vh;
         }
 
-        /* Simple full-viewport slides */
+        /* Very gentle movements */
         .main-content.expanded-1 {
-          transform: translateY(-100vh);
+          transform: translateY(-8vh);
         }
 
         .main-content.expanded-2 {
-          transform: translateY(-200vh);
+          transform: translateY(-16vh);
         }
 
         .main-content.expanded-3 {
-          transform: translateY(-300vh);
+          transform: translateY(-24vh);
         }
 
         .main-content.expanded-4 {
-          transform: translateY(-400vh);
+          transform: translateY(-32vh);
         }
 
         /* Each content section gets its own "page" */
@@ -447,14 +447,10 @@ export default function AleksPortfolio() {
           visibility: hidden;
           width: 90vw;
           max-width: 32rem;
-          margin: 0 auto;
-          padding: 2rem 1.5rem;
+          margin: 1.5rem auto;
+          padding: 1.5rem;
           color: rgba(255, 255, 255, 0.75);
           transition: opacity 1s ease, visibility 1s ease, transform 1s ease;
-          min-height: 60vh;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
           word-wrap: break-word;
           overflow-wrap: break-word;
           hyphens: auto;
