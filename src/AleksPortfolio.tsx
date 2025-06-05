@@ -416,29 +416,30 @@ export default function AleksPortfolio() {
           text-align: center;
           transition: transform 1.8s cubic-bezier(0.23, 1, 0.32, 1);
           will-change: transform;
-          margin-top: 45vh;
+          margin-top: 50vh;
           padding: 0;
-          padding-bottom: 60vh;
+          padding-bottom: 100vh;
           max-height: none;
           overflow: visible;
           box-sizing: border-box;
-          transform-origin: center;
+          transform-origin: center top;
         }
 
+        /* Dynamic centering - each level centers its primary content */
         .main-content.expanded-1 {
-          transform: translateY(-10vh);
+          transform: translateY(calc(-50vh + 20vh));
         }
 
         .main-content.expanded-2 {
-          transform: translateY(-20vh);
+          transform: translateY(calc(-50vh + 10vh));
         }
 
         .main-content.expanded-3 {
-          transform: translateY(-30vh);
+          transform: translateY(calc(-50vh - 10vh));
         }
 
         .main-content.expanded-4 {
-          transform: translateY(-40vh);
+          transform: translateY(calc(-50vh - 30vh));
         }
 
         .desktop-text {
@@ -615,9 +616,9 @@ export default function AleksPortfolio() {
         .content-section {
           opacity: 0;
           visibility: hidden;
-          width: 92vw;
-          max-width: 92vw;
-          margin: 0.8rem auto;
+          width: 90vw;
+          max-width: 32rem;
+          margin: 5vh auto;
           padding: 0.8rem 1rem;
           color: rgba(255, 255, 255, 0.75);
           transition: opacity 1s ease, visibility 1s ease, transform 1s ease;
@@ -1449,7 +1450,7 @@ export default function AleksPortfolio() {
           visibility: hidden;
           width: 90vw;
           max-width: 32rem;
-          margin: 2rem auto;
+          margin: 10vh auto 5vh auto;
           padding: 2rem 1.5rem;
           background: rgba(255, 255, 255, 0.03);
           border: 1px solid rgba(255, 255, 255, 0.12);
