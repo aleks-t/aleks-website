@@ -176,25 +176,29 @@ export default function AleksPortfolio() {
   };
 
   const handleTouchStartReact = (event: React.TouchEvent) => {
-    console.log('React Touch start detected', { y: event.touches[0].clientY, timestamp: Date.now() });
+    console.log('🔥 TOUCH START:', { 
+      y: event.touches[0].clientY, 
+      timestamp: Date.now(),
+      expansionLevel: expansionLevel 
+    });
     touchStartY.current = event.touches[0].clientY;
     touchStartTime.current = Date.now();
-    // Prevent default to stop iOS bounce/scroll
-    event.preventDefault();
+    // Remove preventDefault to allow iOS to process the touch
   };
 
   const handleTouchEndReact = (event: React.TouchEvent) => {
     const now = Date.now();
-    const touchDelay = 600; // Faster response for mobile
+    const touchDelay = 600;
     
-    console.log('React Touch end detected', { 
+    console.log('🔥 TOUCH END:', { 
       y: event.changedTouches[0].clientY, 
       startY: touchStartY.current,
-      duration: now - touchStartTime.current 
+      duration: now - touchStartTime.current,
+      expansionLevel: expansionLevel
     });
 
     if (isAnimating.current || now - lastWheelTime.current < touchDelay) {
-      console.log('React Touch blocked - animating or too soon');
+      console.log('❌ TOUCH BLOCKED: animating or too soon');
       return;
     }
 
@@ -203,34 +207,40 @@ export default function AleksPortfolio() {
     const touchDistance = Math.abs(touchEndY - touchStartY.current);
     const deltaY = touchStartY.current - touchEndY;
     
-    console.log('React Touch analysis', { touchDuration, touchDistance, deltaY, expansionLevel });
+    console.log('📊 TOUCH ANALYSIS:', { 
+      touchDuration, 
+      touchDistance, 
+      deltaY, 
+      expansionLevel,
+      thresholds: { maxDuration: 1500, minDistance: 20 }
+    });
     
-    // Very lenient thresholds for iOS:
-    // - Allow up to 1500ms duration
-    // - Require only 20px minimum distance
+    // More lenient thresholds for iOS
     if (touchDuration > 1500 || touchDistance < 20) {
-      console.log('React Touch rejected - duration or distance threshold');
+      console.log('❌ TOUCH REJECTED: duration or distance');
       return;
     }
 
-    // Clear swipe direction logic for iOS:
-    // - Positive deltaY = swipe up (finger moves up) = expand content
-    // - Negative deltaY = swipe down (finger moves down) = collapse content
     const isSwipeUp = deltaY > 0;
     
-    console.log('React Touch accepted', { isSwipeUp, expansionLevel });
+    console.log('✅ TOUCH ACCEPTED:', { 
+      isSwipeUp, 
+      currentLevel: expansionLevel,
+      willExpand: isSwipeUp && expansionLevel < 4,
+      willCollapse: !isSwipeUp && expansionLevel > 0
+    });
     
     isAnimating.current = true;
     lastWheelTime.current = now;
 
     if (isSwipeUp && expansionLevel < 4) {
-      console.log('React Expanding content');
+      console.log('⬆️ EXPANDING to level:', expansionLevel + 1);
       toggleContent(true);
     } else if (!isSwipeUp && expansionLevel > 0) {
-      console.log('React Collapsing content');
+      console.log('⬇️ COLLAPSING to level:', expansionLevel - 1);
       toggleContent(false);
     } else {
-      console.log('React No action - already at limit');
+      console.log('🚫 NO ACTION: already at limit');
       isAnimating.current = false;
       return;
     }
@@ -238,9 +248,6 @@ export default function AleksPortfolio() {
     setTimeout(() => {
       isAnimating.current = false;
     }, 700);
-    
-    // Prevent default to stop iOS bounce/scroll
-    event.preventDefault();
   };
 
   const handleTimelineMove = (e: React.MouseEvent) => {
@@ -382,11 +389,10 @@ export default function AleksPortfolio() {
           margin: 0;
           height: 100vh;
           overflow: hidden;
-          touch-action: none;
+          touch-action: pan-y;
           -webkit-touch-callout: none;
           -webkit-user-select: none;
           user-select: none;
-          -webkit-overflow-scrolling: none;
           overscroll-behavior: none;
           position: fixed;
           width: 100%;
