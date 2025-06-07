@@ -322,7 +322,7 @@ export default function AleksPortfolio() {
           position: relative;
           width: 100vw;
           text-align: center;
-          transition: transform 1.8s cubic-bezier(0.23, 1, 0.32, 1);
+          transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
           will-change: transform;
           margin-top: 42vh;
           padding: 0;
