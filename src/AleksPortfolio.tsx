@@ -19,6 +19,8 @@ export default function AleksPortfolio() {
   const lastWheelTime = useRef(0);
   const isAnimating = useRef(false);
   const timelineRef = useRef(null);
+  const touchStartY = useRef(0);
+  const lastTouchTime = useRef(0);
 
   const CONFIG = {
     ZIP_CODE: '94132',
@@ -173,6 +175,48 @@ export default function AleksPortfolio() {
     event.preventDefault();
   };
 
+  const handleTouchStart = (event: React.TouchEvent) => {
+    touchStartY.current = event.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (event: React.TouchEvent) => {
+    const now = Date.now();
+    const touchDelay = 1200;
+    
+    if (isAnimating.current || now - lastTouchTime.current < touchDelay) {
+      return;
+    }
+
+    const touchEndY = event.changedTouches[0].clientY;
+    const deltaY = touchStartY.current - touchEndY;
+    const minSwipeDistance = 50; // Minimum distance to trigger swipe
+
+    // Only trigger if swipe is long enough
+    if (Math.abs(deltaY) < minSwipeDistance) {
+      return;
+    }
+
+    const isSwipingUp = deltaY > 0;
+    
+    isAnimating.current = true;
+    lastTouchTime.current = now;
+
+    if (isSwipingUp && expansionLevel < 4) {
+      toggleContent(true);
+    } else if (!isSwipingUp && expansionLevel > 0) {
+      toggleContent(false);
+    } else {
+      isAnimating.current = false;
+      return;
+    }
+
+    setTimeout(() => {
+      isAnimating.current = false;
+    }, 700);
+    
+    event.preventDefault();
+  };
+
   const handleTimelineMove = (e: React.MouseEvent) => {
     if (!timelineRef.current) return;
     
@@ -273,10 +317,19 @@ export default function AleksPortfolio() {
     const handleWheelEvent = (e: WheelEvent) => handleWheel(e);
     window.addEventListener('wheel', handleWheelEvent, { passive: false });
     
+    // Prevent default touch behavior on the document to avoid scroll conflicts
+    const preventDefaultTouch = (e: TouchEvent) => {
+      if (e.touches.length > 1) return; // Allow pinch zoom
+      e.preventDefault();
+    };
+    
+    document.addEventListener('touchmove', preventDefaultTouch, { passive: false });
+    
     handleExpansion();
     
     return () => {
       window.removeEventListener('wheel', handleWheelEvent);
+      document.removeEventListener('touchmove', preventDefaultTouch);
       clearInterval(timeInterval);
     };
   }, [expansionLevel]);
@@ -285,7 +338,12 @@ export default function AleksPortfolio() {
   const firstExpandClass = `expand-button ${expansionLevel > 0 ? 'expanded' : ''}`;
 
   return (
-    <div className="min-h-screen bg-black text-white overflow-hidden relative flex flex-col items-center" style={{ height: '100vh', maxHeight: '100vh' }}>
+    <div 
+      className="min-h-screen bg-black text-white overflow-hidden relative flex flex-col items-center" 
+      style={{ height: '100vh', maxHeight: '100vh' }}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
       <style>{`
         :root {
           --base-unit: calc(1.5vh + 1.5vw);
@@ -305,6 +363,8 @@ export default function AleksPortfolio() {
           margin: 0;
           height: 100vh;
           overflow: hidden;
+          touch-action: pan-y;
+          -webkit-overflow-scrolling: touch;
         }
 
         .top-gradient {
@@ -330,6 +390,7 @@ export default function AleksPortfolio() {
           max-height: 100vh;
           overflow: visible;
           box-sizing: border-box;
+          touch-action: pan-y;
         }
 
         .main-content.expanded-1 {
