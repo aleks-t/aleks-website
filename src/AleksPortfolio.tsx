@@ -1445,7 +1445,7 @@ export default function AleksPortfolio() {
         }
 
         @media (max-width: 768px) {
-          .contact-form {
+          .main-content[data-expansion="4"] .contact-form {
             position: fixed !important;
             top: 50% !important;
             left: 50% !important;
@@ -1457,6 +1457,11 @@ export default function AleksPortfolio() {
             max-height: 80vh;
             overflow-y: auto;
             z-index: 1000;
+          }
+          
+          .main-content[data-expansion="4"] .scroll-section:not(#contactSection) {
+            opacity: 0;
+            visibility: hidden;
           }
         }
 
@@ -1688,7 +1693,7 @@ export default function AleksPortfolio() {
 
       <div className="top-gradient" />
 
-      <div className={mainContentClass}>
+      <div className={mainContentClass} data-expansion={expansionLevel}>
         <div className="mobile-text">
           <p>Hi, I'm Aleks — I turn ambitious ideas into reality through strategic execution.</p>
         </div>
