@@ -409,17 +409,7 @@ export default function AleksPortfolio() {
           transform: translateY(-80vh);
         }
 
-        @media (max-width: 768px) {
-          .main-content.expanded-4 {
-            transform: translateY(-70vh);
-          }
-        }
 
-        @media (max-width: 480px) {
-          .main-content.expanded-4 {
-            transform: translateY(-60vh);
-          }
-        }
 
         .desktop-text {
           display: block;
@@ -1444,24 +1434,25 @@ export default function AleksPortfolio() {
 
         @media (max-width: 768px) {
           .contact-form {
-            width: 92vw;
+            width: 90vw;
             max-width: none;
-            margin: 0.5rem auto 1rem auto;
-            padding: 1rem;
-            max-height: 85vh;
-            position: relative;
-            top: -5vh;
+            margin: 0 auto;
+            padding: 0.8rem;
+            max-height: 70vh;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
           }
         }
 
         @media (max-width: 480px) {
           .contact-form {
-            width: 95vw;
-            margin: 0.2rem auto 0.5rem auto;
-            padding: 0.8rem;
-            max-height: 90vh;
-            top: -10vh;
-            font-size: 0.9rem;
+            width: 92vw;
+            padding: 0.6rem;
+            max-height: 75vh;
+            font-size: 0.85rem;
           }
         }
 
@@ -1512,39 +1503,64 @@ export default function AleksPortfolio() {
         @media (max-width: 768px) {
           .contact-form input,
           .contact-form textarea {
-            padding: 0.7rem 0.8rem;
-            font-size: 0.85rem;
+            padding: 0.5rem 0.6rem;
+            font-size: 0.8rem;
           }
           
           .contact-form textarea {
-            min-height: 80px;
-            max-height: 120px;
+            min-height: 60px;
+            max-height: 80px;
           }
           
           .contact-form .form-group {
-            margin-bottom: 1rem;
+            margin-bottom: 0.6rem;
+          }
+          
+          .contact-form .form-title {
+            font-size: 0.7rem;
+            margin-bottom: 0.8rem;
+          }
+          
+          .contact-form label {
+            font-size: 0.65rem;
+            margin-bottom: 0.3rem;
+          }
+          
+          .contact-form .submit-button {
+            padding: 0.6rem 1rem;
+            font-size: 0.7rem;
           }
         }
 
         @media (max-width: 480px) {
           .contact-form input,
           .contact-form textarea {
-            padding: 0.6rem 0.7rem;
-            font-size: 0.9rem;
+            padding: 0.4rem 0.5rem;
+            font-size: 0.75rem;
           }
           
           .contact-form textarea {
-            min-height: 70px;
-            max-height: 100px;
+            min-height: 50px;
+            max-height: 70px;
           }
           
           .contact-form .form-group {
-            margin-bottom: 0.8rem;
+            margin-bottom: 0.5rem;
           }
           
           .contact-form .form-title {
-            font-size: 0.75rem;
-            margin-bottom: 1rem;
+            font-size: 0.65rem;
+            margin-bottom: 0.6rem;
+          }
+          
+          .contact-form label {
+            font-size: 0.6rem;
+            margin-bottom: 0.2rem;
+          }
+          
+          .contact-form .submit-button {
+            padding: 0.5rem 0.8rem;
+            font-size: 0.65rem;
           }
         }
 
