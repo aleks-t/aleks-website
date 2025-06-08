@@ -12,6 +12,7 @@ export default function AleksPortfolio() {
   const [currentTime, setCurrentTime] = useState("");
   const [weatherEmoji, setWeatherEmoji] = useState("🔍");
   const [contactExpanded, setContactExpanded] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [contactDiscovered, setContactDiscovered] = useState(false);
   const [formStatus, setFormStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [formMessage, setFormMessage] = useState('');
@@ -302,6 +303,17 @@ export default function AleksPortfolio() {
       setContactExpanded(false);
     }
   };
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    handleResize(); // Set initial value
+    window.addEventListener('resize', handleResize);
+    
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     setWeatherAnimationStarted(true);
@@ -1445,23 +1457,27 @@ export default function AleksPortfolio() {
         }
 
         @media (max-width: 768px) {
+          .main-content[data-expansion="4"] > *:not(.contact-form) {
+            display: none !important;
+          }
+          
+          .main-content[data-expansion="4"] {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            min-height: 100vh !important;
+            transform: none !important;
+          }
+          
           .main-content[data-expansion="4"] .contact-form {
-            position: fixed !important;
-            top: 50% !important;
-            left: 50% !important;
-            transform: translate(-50%, -50%) !important;
             width: 92vw;
             max-width: none;
-            margin: 0;
+            margin: 0 auto;
             padding: 0.8rem;
             max-height: 80vh;
             overflow-y: auto;
-            z-index: 1000;
-          }
-          
-          .main-content[data-expansion="4"] .scroll-section:not(#contactSection) {
-            opacity: 0;
-            visibility: hidden;
+            position: relative;
+            transform: none;
           }
         }
 
@@ -1694,80 +1710,84 @@ export default function AleksPortfolio() {
       <div className="top-gradient" />
 
       <div className={mainContentClass} data-expansion={expansionLevel}>
-        <div className="mobile-text">
-          <p>Hi, I'm Aleks — I turn ambitious ideas into reality through strategic execution.</p>
-        </div>
-        
-        <div className="desktop-text">
-          <span>Hi</span><span>, </span>
-          <span>I'm </span>
-          <span className="name relative">Aleks</span>
-          <span>— </span>
-          <span>I turn ambitious ideas into </span>
-          <span className="vision">reality</span>
-          <span> through strategic </span><span className="execution">execution</span><span>.</span>
-        </div>
+        {!(expansionLevel === 4 && isMobile) && (
+          <>
+            <div className="mobile-text">
+              <p>Hi, I'm Aleks — I turn ambitious ideas into reality through strategic execution.</p>
+            </div>
+            
+            <div className="desktop-text">
+              <span>Hi</span><span>, </span>
+              <span>I'm </span>
+              <span className="name relative">Aleks</span>
+              <span>— </span>
+              <span>I turn ambitious ideas into </span>
+              <span className="vision">reality</span>
+              <span> through strategic </span><span className="execution">execution</span><span>.</span>
+            </div>
 
-        <div className={firstExpandClass} onClick={() => toggleContent(true)} />
+            <div className={firstExpandClass} onClick={() => toggleContent(true)} />
 
-        <div className={`content-section ${expansionLevel >= 1 ? 'visible' : ''}`}>
-          <div className="section-hint">Leadership & Scale</div>
-          <p>
-          I've led cross-functional teams through complex product development cycles, with experience managing initiatives ranging from mid-six to seven figures. My focus is on clear communication, realistic timelines, and building scalable processes that align business needs with technical execution
-          </p>
-        </div>
+            <div className={`content-section ${expansionLevel >= 1 ? 'visible' : ''}`}>
+              <div className="section-hint">Leadership & Scale</div>
+              <p>
+              I've led cross-functional teams through complex product development cycles, with experience managing initiatives ranging from mid-six to seven figures. My focus is on clear communication, realistic timelines, and building scalable processes that align business needs with technical execution
+              </p>
+            </div>
 
-        <div className={`content-section ${expansionLevel >= 2 ? 'visible' : ''}`}>
-          <div className="section-hint">Current Work</div>
-          <p>
-          As Card79's Strategic Program Manager, I align industrial design, mechanical, electrical, firmware, UX, and brand teams around a unified roadmap. I own schedules, budgets, and risk plans for products shipping into medical, robotics, and wearable markets, serving founders fresh off seed rounds as well as multinational enterprises launching next‑gen lines.
-          </p>
-        </div>
+            <div className={`content-section ${expansionLevel >= 2 ? 'visible' : ''}`}>
+              <div className="section-hint">Current Work</div>
+              <p>
+              As Card79's Strategic Program Manager, I align industrial design, mechanical, electrical, firmware, UX, and brand teams around a unified roadmap. I own schedules, budgets, and risk plans for products shipping into medical, robotics, and wearable markets, serving founders fresh off seed rounds as well as multinational enterprises launching next‑gen lines.
+              </p>
+            </div>
 
-        <div className={`content-section ${expansionLevel >= 3 ? 'visible' : ''}`} style={{ 
-          background: 'rgba(255, 255, 255, 0.02)',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
-          margin: '0.8rem auto 1.5rem auto',
-          padding: '1rem 1.5rem'
-        }}>
-          <div className="text-center mb-4">
-            <div className="section-hint">Journey</div>
-            <p className="text-white/60 font-light" style={{ fontSize: '0.7rem' }}>Explore the timeline</p>
-          </div>
-          <div 
-            ref={timelineRef}
-            className="timeline"
-            onMouseMove={handleTimelineMove}
-            style={{ 
-              position: 'relative', 
-              marginBottom: '1rem',
-              padding: '0 1rem'
-            }}
-          >
-            {timelineData.map((item, index) => (
-              <div
-                key={item.year}
-                className="timeline-item"
-                style={{ left: `${(index / (timelineData.length - 1)) * 100}%` }}
-                onClick={() => handleTimelineItemClick(index)}
-              >
-                <span className="year">{item.year}</span>
+            <div className={`content-section ${expansionLevel >= 3 ? 'visible' : ''}`} style={{ 
+              background: 'rgba(255, 255, 255, 0.02)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              margin: '0.8rem auto 1.5rem auto',
+              padding: '1rem 1.5rem'
+            }}>
+              <div className="text-center mb-4">
+                <div className="section-hint">Journey</div>
+                <p className="text-white/60 font-light" style={{ fontSize: '0.7rem' }}>Explore the timeline</p>
               </div>
-            ))}
-          </div>
-          <div style={{ 
-            minHeight: '2.5rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '0 1rem',
-            marginBottom: '1.5rem'
-          }}>
-            <p className="timeline-text">
-              {timelineText}
-            </p>
-          </div>
-        </div>
+              <div 
+                ref={timelineRef}
+                className="timeline"
+                onMouseMove={handleTimelineMove}
+                style={{ 
+                  position: 'relative', 
+                  marginBottom: '1rem',
+                  padding: '0 1rem'
+                }}
+              >
+                {timelineData.map((item, index) => (
+                  <div
+                    key={item.year}
+                    className="timeline-item"
+                    style={{ left: `${(index / (timelineData.length - 1)) * 100}%` }}
+                    onClick={() => handleTimelineItemClick(index)}
+                  >
+                    <span className="year">{item.year}</span>
+                  </div>
+                ))}
+              </div>
+              <div style={{ 
+                minHeight: '2.5rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '0 1rem',
+                marginBottom: '1.5rem'
+              }}>
+                <p className="timeline-text">
+                  {timelineText}
+                </p>
+              </div>
+            </div>
+          </>
+        )}
 
         <div className={`contact-form ${expansionLevel >= 4 ? 'visible' : ''}`}>
           <div className="form-title">Get In Touch</div>
