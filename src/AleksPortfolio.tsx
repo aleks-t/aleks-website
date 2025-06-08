@@ -13,6 +13,8 @@ export default function AleksPortfolio() {
   const [weatherEmoji, setWeatherEmoji] = useState("🔍");
   const [contactExpanded, setContactExpanded] = useState(false);
   const [contactDiscovered, setContactDiscovered] = useState(false);
+  const [contactCompressing, setContactCompressing] = useState(false);
+  const [contactExpanding, setContactExpanding] = useState(false);
   const [formStatus, setFormStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [formMessage, setFormMessage] = useState('');
   
@@ -21,6 +23,7 @@ export default function AleksPortfolio() {
   const timelineRef = useRef(null);
   const touchStartY = useRef(0);
   const lastTouchTime = useRef(0);
+  const prevExpansionLevel = useRef(0);
 
   const CONFIG = {
     ZIP_CODE: '94132',
@@ -297,19 +300,48 @@ export default function AleksPortfolio() {
   };
 
   const handleExpansion = () => {
+    const prevLevel = prevExpansionLevel.current;
+    
     if (expansionLevel >= 0) {
       setContactDiscovered(true);
-      if (expansionLevel >= 3) {
-        // Expand to show both email and LinkedIn at level 3
+      
+      // Handle compression animation when transitioning to level 3 (timeline)
+      if (expansionLevel === 3 && prevLevel < 3 && contactDiscovered && !contactCompressing) {
+        setContactCompressing(true);
+        setContactExpanding(false);
+        // Reset compression state after animation completes
+        setTimeout(() => {
+          setContactCompressing(false);
+        }, 600);
+      } else if (expansionLevel < 3) {
+        setContactCompressing(false);
+        
+        // Handle expansion animation when coming back from level 3+ to level 2
+        if (expansionLevel === 2 && prevLevel >= 3 && !contactExpanding) {
+          setContactExpanding(true);
+          // Reset expansion state after animation completes
+          setTimeout(() => {
+            setContactExpanding(false);
+          }, 600);
+        }
+      }
+      
+      if (expansionLevel >= 1 && expansionLevel < 3) {
+        // Expand to show both email and LinkedIn at levels 1-2
         setContactExpanded(true);
       } else {
-        // Show just email button (collapsed) at levels 0-2
+        // Show just email button (collapsed) at level 0 or hide at level 3+
         setContactExpanded(false);
       }
     } else {
       setContactDiscovered(false);
       setContactExpanded(false);
+      setContactCompressing(false);
+      setContactExpanding(false);
     }
+    
+    // Update previous level for next comparison
+    prevExpansionLevel.current = expansionLevel;
   };
 
 
@@ -1169,6 +1201,55 @@ export default function AleksPortfolio() {
           min-width: 3rem;
         }
 
+        .contact-bar.compressing {
+          animation: compressAndDisappear 0.6s cubic-bezier(0.4, 0, 1, 1) forwards;
+        }
+
+        .contact-bar.expanding {
+          animation: expandAndAppear 0.6s cubic-bezier(0, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes compressAndDisappear {
+          0% {
+            transform: translateX(-50%) translateY(0) scaleX(1) scaleY(1);
+            opacity: 1;
+          }
+          30% {
+            transform: translateX(-50%) translateY(0) scaleX(0.7) scaleY(1.1);
+            opacity: 0.8;
+          }
+          60% {
+            transform: translateX(-50%) translateY(0) scaleX(0.3) scaleY(0.8);
+            opacity: 0.4;
+          }
+          100% {
+            transform: translateX(-50%) translateY(10px) scaleX(0) scaleY(0);
+            opacity: 0;
+            visibility: hidden;
+          }
+        }
+
+        @keyframes expandAndAppear {
+          0% {
+            transform: translateX(-50%) translateY(10px) scaleX(0) scaleY(0);
+            opacity: 0;
+            visibility: visible;
+          }
+          40% {
+            transform: translateX(-50%) translateY(0) scaleX(0.3) scaleY(0.8);
+            opacity: 0.4;
+          }
+          70% {
+            transform: translateX(-50%) translateY(0) scaleX(0.7) scaleY(1.1);
+            opacity: 0.8;
+          }
+          100% {
+            transform: translateX(-50%) translateY(0) scaleX(1) scaleY(1);
+            opacity: 1;
+            visibility: visible;
+          }
+        }
+
         .email-button::before {
           content: '';
           position: absolute;
@@ -1334,6 +1415,9 @@ export default function AleksPortfolio() {
 
         .linkedin-icon {
           color: #0077b5;
+          background: none;
+          border: none;
+          cursor: pointer;
         }
 
         .linkedin-icon:hover {
@@ -1751,7 +1835,7 @@ export default function AleksPortfolio() {
           </p>
         </div>
 
-        <div className={`content-section ${expansionLevel >= 2 ? 'visible' : ''}`}>
+        <div className={`content-section ${expansionLevel >= 2 ? 'visible' : ''}`} onClick={() => expansionLevel >= 2 && setExpansionLevel(3)}>
           <div className="section-hint">Current Work</div>
           <p>
           As Card79's Strategic Program Manager, I align industrial design, mechanical, electrical, firmware, UX, and brand teams around a unified roadmap. I own schedules, budgets, and risk plans for products shipping into medical, robotics, and wearable markets, serving founders fresh off seed rounds as well as multinational enterprises launching next‑gen lines.
@@ -1867,8 +1951,8 @@ export default function AleksPortfolio() {
         </div>
       </div>
 
-      {contactDiscovered && expansionLevel < 3 && (
-        <div className={`contact-bar ${!contactExpanded ? 'collapsed' : ''}`}>
+      {contactDiscovered && (expansionLevel < 3 || contactCompressing) && (
+        <div className={`contact-bar ${!contactExpanded ? 'collapsed' : ''} ${contactCompressing ? 'compressing' : ''} ${contactExpanding ? 'expanding' : ''}`}>
           <div className={`contact-content ${!contactExpanded ? 'collapsed' : ''}`}>
             <button 
               type="button" 
@@ -1884,13 +1968,18 @@ export default function AleksPortfolio() {
             <div className={`social-divider ${!contactExpanded ? 'collapsed' : ''}`}></div>
             
             <div className={`social-links ${!contactExpanded ? 'collapsed' : ''}`}>
-              <a href="https://linkedin.com/in/your-profile" target="_blank" rel="noopener noreferrer" className="social-icon linkedin-icon" title="LinkedIn">
+              <button
+                type="button"
+                className="social-icon linkedin-icon"
+                onClick={() => setExpansionLevel(3)}
+                title="View Timeline"
+              >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="#0077b5" stroke="none">
                   <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
                   <rect x="2" y="9" width="4" height="12"></rect>
                   <circle cx="4" cy="4" r="2"></circle>
                 </svg>
-              </a>
+              </button>
             </div>
           </div>
         </div>
