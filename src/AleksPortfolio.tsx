@@ -409,6 +409,18 @@ export default function AleksPortfolio() {
           transform: translateY(-80vh);
         }
 
+        @media (max-width: 768px) {
+          .main-content.expanded-4 {
+            transform: translateY(-65vh);
+          }
+        }
+
+        @media (max-width: 480px) {
+          .main-content.expanded-4 {
+            transform: translateY(-55vh);
+          }
+        }
+
 
 
         .desktop-text {
@@ -1434,24 +1446,20 @@ export default function AleksPortfolio() {
 
         @media (max-width: 768px) {
           .contact-form {
-            width: 90vw;
+            width: 92vw;
             max-width: none;
             margin: 0 auto;
             padding: 0.8rem;
-            max-height: 70vh;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 1000;
+            max-height: 60vh;
+            overflow-y: auto;
           }
         }
 
         @media (max-width: 480px) {
           .contact-form {
-            width: 92vw;
+            width: 95vw;
             padding: 0.6rem;
-            max-height: 75vh;
+            max-height: 65vh;
             font-size: 0.85rem;
           }
         }
@@ -1503,7 +1511,39 @@ export default function AleksPortfolio() {
         @media (max-width: 768px) {
           .contact-form input,
           .contact-form textarea {
-            padding: 0.5rem 0.6rem;
+            padding: 0.6rem 0.8rem;
+            font-size: 0.85rem;
+          }
+          
+          .contact-form textarea {
+            min-height: 70px;
+            max-height: 90px;
+          }
+          
+          .contact-form .form-group {
+            margin-bottom: 0.8rem;
+          }
+          
+          .contact-form .form-title {
+            font-size: 0.8rem;
+            margin-bottom: 1rem;
+          }
+          
+          .contact-form label {
+            font-size: 0.7rem;
+            margin-bottom: 0.4rem;
+          }
+          
+          .contact-form .submit-button {
+            padding: 0.8rem 1.2rem;
+            font-size: 0.75rem;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .contact-form input,
+          .contact-form textarea {
+            padding: 0.5rem 0.7rem;
             font-size: 0.8rem;
           }
           
@@ -1513,11 +1553,11 @@ export default function AleksPortfolio() {
           }
           
           .contact-form .form-group {
-            margin-bottom: 0.6rem;
+            margin-bottom: 0.7rem;
           }
           
           .contact-form .form-title {
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             margin-bottom: 0.8rem;
           }
           
@@ -1527,40 +1567,8 @@ export default function AleksPortfolio() {
           }
           
           .contact-form .submit-button {
-            padding: 0.6rem 1rem;
+            padding: 0.7rem 1rem;
             font-size: 0.7rem;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .contact-form input,
-          .contact-form textarea {
-            padding: 0.4rem 0.5rem;
-            font-size: 0.75rem;
-          }
-          
-          .contact-form textarea {
-            min-height: 50px;
-            max-height: 70px;
-          }
-          
-          .contact-form .form-group {
-            margin-bottom: 0.5rem;
-          }
-          
-          .contact-form .form-title {
-            font-size: 0.65rem;
-            margin-bottom: 0.6rem;
-          }
-          
-          .contact-form label {
-            font-size: 0.6rem;
-            margin-bottom: 0.2rem;
-          }
-          
-          .contact-form .submit-button {
-            padding: 0.5rem 0.8rem;
-            font-size: 0.65rem;
           }
         }
 
