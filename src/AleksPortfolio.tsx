@@ -136,6 +136,15 @@ export default function AleksPortfolio() {
           }
         }
       }
+      
+      // Restart weather animation when reaching contact form on mobile
+      if (newLevel === 4 && window.innerWidth <= 768) {
+        setIsLoading(true);
+        setWeatherAnimationCompleted(false);
+        setLocation("Finding Aleks");
+        setWeatherEmoji("🔍");
+        fetchWeather();
+      }
     } else if (!expand && expansionLevel > 0) {
       const newLevel = expansionLevel - 1;
       setExpansionLevel(newLevel);
@@ -789,18 +798,65 @@ export default function AleksPortfolio() {
           min-height: 2.5rem;
         }
 
+        .mobile-weather-container {
+          display: none;
+          opacity: 0;
+          visibility: hidden;
+          transform: translateY(20px);
+          transition: all 1s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .mobile-weather-container.visible {
+          opacity: 1;
+          visibility: visible;
+          transform: translateY(0);
+        }
+
         @media (max-width: 768px), (max-width: 820px) and (orientation: portrait) {
-          .weather-container,
-          .weather-container.loading,
-          .weather-container.pin-only,
-          .weather-container:hover,
-          .weather-container.pin-only:hover {
+          .weather-container:not(.mobile-weather-container .weather-container),
+          .weather-container.loading:not(.mobile-weather-container .weather-container),
+          .weather-container.pin-only:not(.mobile-weather-container .weather-container),
+          .weather-container:hover:not(.mobile-weather-container .weather-container),
+          .weather-container.pin-only:hover:not(.mobile-weather-container .weather-container) {
             display: none !important;
             visibility: hidden !important;
             opacity: 0 !important;
             pointer-events: none !important;
             position: absolute !important;
             top: -9999px !important;
+          }
+          
+          .mobile-weather-container {
+            display: block !important;
+            width: 92vw !important;
+            margin: 0.8rem auto !important;
+          }
+          
+          .mobile-weather-container .weather-container {
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            pointer-events: auto !important;
+            position: static !important;
+            top: auto !important;
+            right: auto !important;
+            left: auto !important;
+            margin: 0 auto !important;
+            width: auto !important;
+            max-width: 200px !important;
+            justify-content: center !important;
+            transform: none !important;
+            border-radius: 1.5rem !important;
+            padding: 0.6rem 1.2rem !important;
+            background: rgba(20, 20, 20, 0.8) !important;
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
+            backdrop-filter: blur(12px) !important;
+            font-size: 0.8rem !important;
+            font-weight: 500 !important;
+            letter-spacing: 0.02em !important;
+            color: rgba(255, 255, 255, 0.9) !important;
+            white-space: nowrap !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
           }
 
           .contact-form {
@@ -1774,6 +1830,25 @@ export default function AleksPortfolio() {
             </button>
           </form>
         </div>
+
+        {/* Weather widget below contact form on mobile */}
+        <div className={`mobile-weather-container ${expansionLevel >= 4 ? 'visible' : ''}`}>
+          <div className={`weather-container ${isLoading ? 'loading' : 'pin-only'}`}>
+            <div className="weather-content">
+              <span className="location-pin">📍</span>
+              <span className={`location-emoji ${isLoading ? 'finding-animation' : ''}`}>
+                {isLoading ? '🔍' : weatherEmoji}
+              </span>
+              <span className={`location-text ${isLoading ? 'loading' : ''}`}>{location}</span>
+              {currentTime && !isLoading && (
+                <>
+                  <span className="time-separator"></span>
+                  <span className="time-text">{currentTime}</span>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className={`weather-container ${isLoading ? 'loading' : 'pin-only'}`}>
@@ -1792,7 +1867,7 @@ export default function AleksPortfolio() {
         </div>
       </div>
 
-      {contactDiscovered && expansionLevel < 4 && (
+      {contactDiscovered && expansionLevel < 3 && (
         <div className={`contact-bar ${!contactExpanded ? 'collapsed' : ''}`}>
           <div className={`contact-content ${!contactExpanded ? 'collapsed' : ''}`}>
             <button 
