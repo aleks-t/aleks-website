@@ -1207,6 +1207,8 @@ export default function AleksPortfolio() {
 
         .contact-bar.expanding {
           animation: expandAndAppear 0.6s cubic-bezier(0, 0, 0.2, 1) forwards;
+          transform-origin: center center;
+          left: 50% !important;
         }
 
         @keyframes compressAndDisappear {
@@ -1231,22 +1233,26 @@ export default function AleksPortfolio() {
 
         @keyframes expandAndAppear {
           0% {
-            transform: translateX(-50%) translateY(10px) scaleX(0) scaleY(0);
+            transform: translateX(-50%) translateY(10px) scale(0);
             opacity: 0;
             visibility: visible;
+            left: 50%;
           }
           40% {
-            transform: translateX(-50%) translateY(0) scaleX(0.3) scaleY(0.8);
+            transform: translateX(-50%) translateY(0) scale(0.3);
             opacity: 0.4;
+            left: 50%;
           }
           70% {
             transform: translateX(-50%) translateY(0) scaleX(0.7) scaleY(1.1);
             opacity: 0.8;
+            left: 50%;
           }
           100% {
-            transform: translateX(-50%) translateY(0) scaleX(1) scaleY(1);
+            transform: translateX(-50%) translateY(0) scale(1);
             opacity: 1;
             visibility: visible;
+            left: 50%;
           }
         }
 
