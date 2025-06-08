@@ -13,6 +13,8 @@ export default function AleksPortfolio() {
   const [weatherEmoji, setWeatherEmoji] = useState("🔍");
   const [contactExpanded, setContactExpanded] = useState(false);
   const [contactDiscovered, setContactDiscovered] = useState(false);
+  const [contactCompressing, setContactCompressing] = useState(false);
+  const [contactExpanding, setContactExpanding] = useState(false);
   const [formStatus, setFormStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [formMessage, setFormMessage] = useState('');
   
@@ -21,6 +23,7 @@ export default function AleksPortfolio() {
   const timelineRef = useRef(null);
   const touchStartY = useRef(0);
   const lastTouchTime = useRef(0);
+  const prevExpansionLevel = useRef(0);
 
   const CONFIG = {
     ZIP_CODE: '94132',
@@ -135,6 +138,15 @@ export default function AleksPortfolio() {
             fetchWeather();
           }
         }
+      }
+      
+      // Restart weather animation when reaching contact form on mobile
+      if (newLevel === 4 && window.innerWidth <= 768) {
+        setIsLoading(true);
+        setWeatherAnimationCompleted(false);
+        setLocation("Finding Aleks");
+        setWeatherEmoji("🔍");
+        fetchWeather();
       }
     } else if (!expand && expansionLevel > 0) {
       const newLevel = expansionLevel - 1;
@@ -288,19 +300,49 @@ export default function AleksPortfolio() {
   };
 
   const handleExpansion = () => {
+    const prevLevel = prevExpansionLevel.current;
+    
     if (expansionLevel >= 0) {
       setContactDiscovered(true);
-      if (expansionLevel >= 3) {
-        // Expand to show both email and LinkedIn at level 3
+      
+      // Handle compression animation when transitioning from level 2 to level 3 (before timeline appears)
+      if (expansionLevel === 3 && prevLevel === 2 && contactDiscovered && !contactCompressing) {
+        setContactCompressing(true);
+        setContactExpanded(false);
+        setContactExpanding(false);
+        // Reset compression state after animation completes
+        setTimeout(() => {
+          setContactCompressing(false);
+        }, 600);
+      } else if (expansionLevel < 3) {
+        setContactCompressing(false);
+        
+        // Handle expansion animation when coming back from level 3+ to level 2
+        if (expansionLevel === 2 && prevLevel >= 3 && !contactExpanding) {
+          setContactExpanding(true);
+          // Reset expansion state after animation completes
+          setTimeout(() => {
+            setContactExpanding(false);
+          }, 600);
+        }
+      }
+      
+      if (expansionLevel >= 1 && expansionLevel < 3 && !contactCompressing) {
+        // Expand to show both email and LinkedIn at levels 1-2 (unless compressing)
         setContactExpanded(true);
       } else {
-        // Show just email button (collapsed) at levels 0-2
+        // Show just email button (collapsed) at level 0 or hide at level 3+
         setContactExpanded(false);
       }
     } else {
       setContactDiscovered(false);
       setContactExpanded(false);
+      setContactCompressing(false);
+      setContactExpanding(false);
     }
+    
+    // Update previous level for next comparison
+    prevExpansionLevel.current = expansionLevel;
   };
 
 
@@ -789,18 +831,65 @@ export default function AleksPortfolio() {
           min-height: 2.5rem;
         }
 
+        .mobile-weather-container {
+          display: none;
+          opacity: 0;
+          visibility: hidden;
+          transform: translateY(20px);
+          transition: all 1s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .mobile-weather-container.visible {
+          opacity: 1;
+          visibility: visible;
+          transform: translateY(0);
+        }
+
         @media (max-width: 768px), (max-width: 820px) and (orientation: portrait) {
-          .weather-container,
-          .weather-container.loading,
-          .weather-container.pin-only,
-          .weather-container:hover,
-          .weather-container.pin-only:hover {
+          .weather-container:not(.mobile-weather-container .weather-container),
+          .weather-container.loading:not(.mobile-weather-container .weather-container),
+          .weather-container.pin-only:not(.mobile-weather-container .weather-container),
+          .weather-container:hover:not(.mobile-weather-container .weather-container),
+          .weather-container.pin-only:hover:not(.mobile-weather-container .weather-container) {
             display: none !important;
             visibility: hidden !important;
             opacity: 0 !important;
             pointer-events: none !important;
             position: absolute !important;
             top: -9999px !important;
+          }
+          
+          .mobile-weather-container {
+            display: block !important;
+            width: 92vw !important;
+            margin: 0.8rem auto !important;
+          }
+          
+          .mobile-weather-container .weather-container {
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            pointer-events: auto !important;
+            position: static !important;
+            top: auto !important;
+            right: auto !important;
+            left: auto !important;
+            margin: 0 auto !important;
+            width: auto !important;
+            max-width: 200px !important;
+            justify-content: center !important;
+            transform: none !important;
+            border-radius: 1.5rem !important;
+            padding: 0.6rem 1.2rem !important;
+            background: rgba(20, 20, 20, 0.8) !important;
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
+            backdrop-filter: blur(12px) !important;
+            font-size: 0.8rem !important;
+            font-weight: 500 !important;
+            letter-spacing: 0.02em !important;
+            color: rgba(255, 255, 255, 0.9) !important;
+            white-space: nowrap !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
           }
 
           .contact-form {
@@ -1113,6 +1202,67 @@ export default function AleksPortfolio() {
           min-width: 3rem;
         }
 
+        .contact-bar.compressing {
+          animation: compressAndDisappear 0.6s cubic-bezier(0.4, 0, 1, 1) forwards;
+        }
+
+        .contact-bar.expanding {
+          animation: expandAndAppear 0.6s cubic-bezier(0, 0, 0.2, 1) forwards;
+          transform-origin: center center !important;
+          left: 50% !important;
+          margin-left: 0 !important;
+          position: fixed !important;
+        }
+
+        @keyframes compressAndDisappear {
+          0% {
+            transform: translateX(-50%) translateY(0) scaleX(1) scaleY(1);
+            opacity: 1;
+          }
+          30% {
+            transform: translateX(-50%) translateY(0) scaleX(0.7) scaleY(1.1);
+            opacity: 0.8;
+          }
+          60% {
+            transform: translateX(-50%) translateY(0) scaleX(0.3) scaleY(0.8);
+            opacity: 0.4;
+          }
+          100% {
+            transform: translateX(-50%) translateY(10px) scaleX(0) scaleY(0);
+            opacity: 0;
+            visibility: hidden;
+          }
+        }
+
+        @keyframes expandAndAppear {
+          0% {
+            transform: translateX(-50%) translateY(10px) scale(0) !important;
+            opacity: 0;
+            visibility: visible;
+            left: 50% !important;
+            margin-left: 0 !important;
+          }
+          40% {
+            transform: translateX(-50%) translateY(0) scale(0.3) !important;
+            opacity: 0.4;
+            left: 50% !important;
+            margin-left: 0 !important;
+          }
+          70% {
+            transform: translateX(-50%) translateY(0) scaleX(0.7) scaleY(1.1) !important;
+            opacity: 0.8;
+            left: 50% !important;
+            margin-left: 0 !important;
+          }
+          100% {
+            transform: translateX(-50%) translateY(0) scale(1) !important;
+            opacity: 1;
+            visibility: visible;
+            left: 50% !important;
+            margin-left: 0 !important;
+          }
+        }
+
         .email-button::before {
           content: '';
           position: absolute;
@@ -1278,6 +1428,9 @@ export default function AleksPortfolio() {
 
         .linkedin-icon {
           color: #0077b5;
+          background: none;
+          border: none;
+          cursor: pointer;
         }
 
         .linkedin-icon:hover {
@@ -1695,7 +1848,7 @@ export default function AleksPortfolio() {
           </p>
         </div>
 
-        <div className={`content-section ${expansionLevel >= 2 ? 'visible' : ''}`}>
+        <div className={`content-section ${expansionLevel >= 2 ? 'visible' : ''}`} onClick={() => expansionLevel >= 2 && setExpansionLevel(3)}>
           <div className="section-hint">Current Work</div>
           <p>
           As Card79's Strategic Program Manager, I align industrial design, mechanical, electrical, firmware, UX, and brand teams around a unified roadmap. I own schedules, budgets, and risk plans for products shipping into medical, robotics, and wearable markets, serving founders fresh off seed rounds as well as multinational enterprises launching next‑gen lines.
@@ -1774,6 +1927,25 @@ export default function AleksPortfolio() {
             </button>
           </form>
         </div>
+
+        {/* Weather widget below contact form on mobile */}
+        <div className={`mobile-weather-container ${expansionLevel >= 4 ? 'visible' : ''}`}>
+          <div className={`weather-container ${isLoading ? 'loading' : 'pin-only'}`}>
+            <div className="weather-content">
+              <span className="location-pin">📍</span>
+              <span className={`location-emoji ${isLoading ? 'finding-animation' : ''}`}>
+                {isLoading ? '🔍' : weatherEmoji}
+              </span>
+              <span className={`location-text ${isLoading ? 'loading' : ''}`}>{location}</span>
+              {currentTime && !isLoading && (
+                <>
+                  <span className="time-separator"></span>
+                  <span className="time-text">{currentTime}</span>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className={`weather-container ${isLoading ? 'loading' : 'pin-only'}`}>
@@ -1792,8 +1964,8 @@ export default function AleksPortfolio() {
         </div>
       </div>
 
-      {contactDiscovered && expansionLevel < 4 && (
-        <div className={`contact-bar ${!contactExpanded ? 'collapsed' : ''}`}>
+      {contactDiscovered && (expansionLevel < 3 || contactCompressing || contactExpanding) && (
+        <div className={`contact-bar ${!contactExpanded ? 'collapsed' : ''} ${contactCompressing ? 'compressing' : ''} ${contactExpanding ? 'expanding' : ''}`}>
           <div className={`contact-content ${!contactExpanded ? 'collapsed' : ''}`}>
             <button 
               type="button" 
@@ -1809,13 +1981,18 @@ export default function AleksPortfolio() {
             <div className={`social-divider ${!contactExpanded ? 'collapsed' : ''}`}></div>
             
             <div className={`social-links ${!contactExpanded ? 'collapsed' : ''}`}>
-              <a href="https://linkedin.com/in/your-profile" target="_blank" rel="noopener noreferrer" className="social-icon linkedin-icon" title="LinkedIn">
+              <button
+                type="button"
+                className="social-icon linkedin-icon"
+                onClick={() => setExpansionLevel(3)}
+                title="View Timeline"
+              >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="#0077b5" stroke="none">
                   <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
                   <rect x="2" y="9" width="4" height="12"></rect>
                   <circle cx="4" cy="4" r="2"></circle>
                 </svg>
-              </a>
+              </button>
             </div>
           </div>
         </div>
