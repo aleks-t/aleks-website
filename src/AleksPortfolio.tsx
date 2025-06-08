@@ -1290,6 +1290,7 @@ export default function AleksPortfolio() {
           .contact-bar {
             bottom: 1.5rem;
             padding: 0.6rem 1.2rem;
+            height: 3.2rem;
           }
 
           .contact-bar.collapsed {
@@ -1300,26 +1301,26 @@ export default function AleksPortfolio() {
           }
 
           .email-button {
-            padding: 0.55rem 1.1rem;
-            font-size: 0.8rem;
-            border-radius: 1.5rem;
+            padding: 0.65rem;
+            width: 2.6rem;
+            height: 2.4rem;
           }
 
           .email-button.collapsed {
-            padding: 0.35rem 0.5rem;
-            width: 2.8rem;
-            height: 2rem;
-            border-radius: 1.5rem;
+            padding: 0.65rem;
+            width: 2.6rem;
+            height: 2.4rem;
           }
 
           .social-icon {
-            padding: 0.55rem 1.1rem;
-            font-size: 0.8rem;
-            border-radius: 1.5rem;
+            padding: 0.65rem;
+            width: 2.6rem;
+            height: 2.4rem;
           }
 
-          .social-divider {
-            height: 1.6rem;
+          .button-icon, .social-icon svg {
+            width: 20px;
+            height: 20px;
           }
         }
 
@@ -1425,7 +1426,7 @@ export default function AleksPortfolio() {
         .contact-form {
           opacity: 0;
           visibility: hidden;
-          width: 95vw;
+          width: 92vw;
           max-width: 32rem;
           margin: 1rem auto 2rem auto;
           padding: 1.2rem;
@@ -1444,7 +1445,7 @@ export default function AleksPortfolio() {
 
         @media (max-width: 480px) {
           .contact-form {
-            width: 95vw;
+            width: 92vw;
             padding: 0.6rem;
             max-height: 85vh;
             font-size: 0.85rem;
