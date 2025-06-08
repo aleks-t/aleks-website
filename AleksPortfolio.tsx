@@ -1445,25 +1445,27 @@ export default function AleksPortfolio() {
         }
 
         @media (max-width: 768px) {
-          .main-content[data-expansion="4"] {
-            transform: translateY(-50vh) !important;
+          .main-content[data-expansion="4"] > *:not(.contact-form) {
+            display: none !important;
           }
           
-          .main-content[data-expansion="4"] .mobile-text,
-          .main-content[data-expansion="4"] .desktop-text,
-          .main-content[data-expansion="4"] .content-section {
-            display: none !important;
+          .main-content[data-expansion="4"] {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            min-height: 100vh !important;
+            transform: none !important;
           }
           
           .main-content[data-expansion="4"] .contact-form {
             width: 92vw;
             max-width: none;
-            margin: 50vh auto 0 auto;
+            margin: 0 auto;
             padding: 0.8rem;
             max-height: 80vh;
             overflow-y: auto;
             position: relative;
-            transform: translateY(-50%);
+            transform: none;
           }
         }
 
