@@ -411,13 +411,13 @@ export default function AleksPortfolio() {
 
         @media (max-width: 768px) {
           .main-content.expanded-4 {
-            transform: translateY(-45vh);
+            transform: translateY(-80vh);
           }
         }
 
         @media (max-width: 480px) {
           .main-content.expanded-4 {
-            transform: translateY(-35vh);
+            transform: translateY(-80vh);
           }
         }
 
@@ -1445,13 +1445,25 @@ export default function AleksPortfolio() {
         }
 
         @media (max-width: 768px) {
-          .contact-form {
+          .main-content[data-expansion="4"] {
+            transform: translateY(-50vh) !important;
+          }
+          
+          .main-content[data-expansion="4"] .mobile-text,
+          .main-content[data-expansion="4"] .desktop-text,
+          .main-content[data-expansion="4"] .content-section {
+            display: none !important;
+          }
+          
+          .main-content[data-expansion="4"] .contact-form {
             width: 92vw;
             max-width: none;
-            margin: 2rem auto;
+            margin: 50vh auto 0 auto;
             padding: 0.8rem;
-            max-height: 70vh;
+            max-height: 80vh;
             overflow-y: auto;
+            position: relative;
+            transform: translateY(-50%);
           }
         }
 
@@ -1459,8 +1471,7 @@ export default function AleksPortfolio() {
           .contact-form {
             width: 95vw;
             padding: 0.6rem;
-            margin: 1.5rem auto;
-            max-height: 75vh;
+            max-height: 85vh;
             font-size: 0.85rem;
           }
         }
@@ -1684,7 +1695,7 @@ export default function AleksPortfolio() {
 
       <div className="top-gradient" />
 
-      <div className={mainContentClass}>
+      <div className={mainContentClass} data-expansion={expansionLevel}>
         <div className="mobile-text">
           <p>Hi, I'm Aleks — I turn ambitious ideas into reality through strategic execution.</p>
         </div>
