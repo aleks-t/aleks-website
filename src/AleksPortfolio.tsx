@@ -411,13 +411,13 @@ export default function AleksPortfolio() {
 
         @media (max-width: 768px) {
           .main-content.expanded-4 {
-            transform: translateY(-65vh);
+            transform: translateY(-80vh);
           }
         }
 
         @media (max-width: 480px) {
           .main-content.expanded-4 {
-            transform: translateY(-55vh);
+            transform: translateY(-80vh);
           }
         }
 
@@ -1446,12 +1446,17 @@ export default function AleksPortfolio() {
 
         @media (max-width: 768px) {
           .contact-form {
+            position: fixed !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
             width: 92vw;
             max-width: none;
-            margin: 0 auto;
+            margin: 0;
             padding: 0.8rem;
-            max-height: 60vh;
+            max-height: 80vh;
             overflow-y: auto;
+            z-index: 1000;
           }
         }
 
@@ -1459,7 +1464,7 @@ export default function AleksPortfolio() {
           .contact-form {
             width: 95vw;
             padding: 0.6rem;
-            max-height: 65vh;
+            max-height: 85vh;
             font-size: 0.85rem;
           }
         }
