@@ -1,6 +1,7 @@
 {
   "name": "aleks-portfolio",
   "version": "1.0.0",
+  "homepage": "https://aleksandertsatskin.com",
   "description": "Interactive React portfolio for Aleks",
   "main": "index.js",
   "scripts": {
