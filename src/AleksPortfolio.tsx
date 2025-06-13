@@ -1970,7 +1970,7 @@ export default function AleksPortfolio() {
             <button 
               type="button" 
               className={`email-button ${!contactExpanded ? 'collapsed' : ''}`}
-              onClick={() => setExpansionLevel(4)}
+              onClick={() => window.location.href = 'mailto:aleksandertsatskin@gmail.com'}
             >
               <svg className="button-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
@@ -1984,8 +1984,8 @@ export default function AleksPortfolio() {
               <button
                 type="button"
                 className="social-icon linkedin-icon"
-                onClick={() => setExpansionLevel(3)}
-                title="View Timeline"
+                onClick={() => window.open('https://www.linkedin.com/in/aleksander-tsatskin-63167125', '_blank')}
+                title="LinkedIn Profile"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="#0077b5" stroke="none">
                   <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
