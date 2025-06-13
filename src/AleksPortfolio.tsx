@@ -1826,7 +1826,7 @@ export default function AleksPortfolio() {
 
       <div className={mainContentClass} data-expansion={expansionLevel}>
         <div className="mobile-text">
-          <p>Hi, I'm Aleks — I turn ambitious ideas into reality through strategic execution.</p>
+          <p>Hi, I'm Aleks — I help turn ambitious ideas into reality through strategic execution.</p>
         </div>
         
         <div className="desktop-text">
