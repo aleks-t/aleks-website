@@ -1834,7 +1834,7 @@ export default function AleksPortfolio() {
           <span>I'm </span>
           <span className="name relative">Aleks</span>
           <span>— </span>
-          <span>I turn ambitious ideas into </span>
+          <span>I help turn ambitious ideas into </span>
           <span className="vision">reality</span>
           <span> through strategic </span><span className="execution">execution</span><span>.</span>
         </div>
