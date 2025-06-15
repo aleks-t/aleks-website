@@ -62,7 +62,7 @@ export default function AleksPortfolio() {
     },
     {
       year: '2017',
-      description: 'Graduated from SJSU with a B.S. in Industrial Design; IDSA ’17 Student Merit Award Finalist.'
+      description: 'Graduated from SJSU with a B.S. in Industrial Design; IDSA '17 Student Merit Award Finalist.'
     },
     {
       year: '2021',
@@ -160,7 +160,7 @@ export default function AleksPortfolio() {
 
   const handleWheel = (event: WheelEvent) => {
     const now = Date.now();
-    const wheelDelay = 1000;
+    const wheelDelay = 800;
     
     if (isAnimating.current || now - lastWheelTime.current < wheelDelay) {
       return;
@@ -173,8 +173,14 @@ export default function AleksPortfolio() {
 
     if (isScrollingDown && expansionLevel < 4) {
       toggleContent(true);
+      if (expansionLevel >= 2) {
+        setContactExpanded(false);
+      }
     } else if (!isScrollingDown && expansionLevel > 0) {
       toggleContent(false);
+      if (expansionLevel >= 2) {
+        setContactExpanded(true);
+      }
     } else {
       isAnimating.current = false;
       return;
