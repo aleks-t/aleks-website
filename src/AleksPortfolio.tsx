@@ -62,7 +62,7 @@ export default function AleksPortfolio() {
     },
     {
       year: '2017',
-      description: 'Graduated from SJSU with a B.S. in Industrial Design; IDSA '17 Student Merit Award Finalist.'
+      description: "Graduated from SJSU with a B.S. in Industrial Design; IDSA '17 Student Merit Award Finalist."
     },
     {
       year: '2021',
