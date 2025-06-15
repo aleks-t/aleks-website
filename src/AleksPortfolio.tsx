@@ -12,7 +12,9 @@ export default function AleksPortfolio() {
   const [currentTime, setCurrentTime] = useState("");
   const [weatherEmoji, setWeatherEmoji] = useState("🔍");
   const [contactExpanded, setContactExpanded] = useState(false);
-  const [contactDiscovered, setContactDiscovered] = useState(true);
+  const [contactDiscovered, setContactDiscovered] = useState(false);
+  const [contactCompressing, setContactCompressing] = useState(false);
+  const [contactExpanding, setContactExpanding] = useState(false);
   const [formStatus, setFormStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [formMessage, setFormMessage] = useState('');
   
@@ -123,37 +125,41 @@ export default function AleksPortfolio() {
     }
   };
 
-  const toggleContent = (expand: boolean) => {
-    if (expand && expansionLevel < 4) {
-      const newLevel = expansionLevel + 1;
-      setExpansionLevel(newLevel);
-      
-      if (newLevel === 1) {
-        setShowWeatherOnMobile(true);
-        if (window.innerWidth <= 640 && !weatherAnimationStarted) {
-          setWeatherAnimationStarted(true);
-          if (!weatherAnimationCompleted) {
-            fetchWeather();
-          }
+  const handleExpansion = () => {
+    const prevLevel = prevExpansionLevel.current;
+
+    if (expansionLevel >= 0) {
+      setContactDiscovered(true);
+
+      // For level 3, just hide the bar (no compressing animation)
+      if (expansionLevel === 3 && prevLevel === 2) {
+        setContactCompressing(false);
+        setContactExpanded(false);
+        setContactExpanding(false);
+      } else if (expansionLevel < 3) {
+        setContactCompressing(false);
+        // Handle expansion animation when coming back from level 3+ to level 2
+        if (expansionLevel === 2 && prevLevel >= 3 && !contactExpanding) {
+          setContactExpanding(true);
+          setTimeout(() => {
+            setContactExpanding(false);
+          }, 600);
         }
       }
-      
-      // Restart weather animation when reaching contact form on mobile
-      if (newLevel === 4 && window.innerWidth <= 768) {
-        setIsLoading(true);
-        setWeatherAnimationCompleted(false);
-        setLocation("Finding Aleks");
-        setWeatherEmoji("🔍");
-        fetchWeather();
+
+      if (expansionLevel >= 1 && expansionLevel < 3 && !contactCompressing) {
+        setContactExpanded(true);
+      } else {
+        setContactExpanded(false);
       }
-    } else if (!expand && expansionLevel > 0) {
-      const newLevel = expansionLevel - 1;
-      setExpansionLevel(newLevel);
-      
-      if (newLevel === 0) {
-        setShowWeatherOnMobile(false);
-      }
+    } else {
+      setContactDiscovered(false);
+      setContactExpanded(false);
+      setContactCompressing(false);
+      setContactExpanding(false);
     }
+
+    prevExpansionLevel.current = expansionLevel;
   };
 
   const handleWheel = (event: WheelEvent) => {
@@ -170,15 +176,9 @@ export default function AleksPortfolio() {
     lastWheelTime.current = now;
 
     if (isScrollingDown && expansionLevel < 4) {
-      toggleContent(true);
-      if (expansionLevel >= 2) {
-        setContactExpanded(false);
-      }
+      setExpansionLevel(expansionLevel + 1);
     } else if (!isScrollingDown && expansionLevel > 0) {
-      toggleContent(false);
-      if (expansionLevel >= 2) {
-        setContactExpanded(true);
-      }
+      setExpansionLevel(expansionLevel - 1);
     } else {
       isAnimating.current = false;
       return;
@@ -217,9 +217,9 @@ export default function AleksPortfolio() {
     lastTouchTime.current = now;
 
     if (isSwipingUp && expansionLevel < 4) {
-      toggleContent(true);
+      setExpansionLevel(expansionLevel + 1);
     } else if (!isSwipingUp && expansionLevel > 0) {
-      toggleContent(false);
+      setExpansionLevel(expansionLevel - 1);
     } else {
       isAnimating.current = false;
       return;
@@ -316,6 +316,7 @@ export default function AleksPortfolio() {
       e.preventDefault();
     };
     document.addEventListener('touchmove', preventDefaultTouch, { passive: false });
+    handleExpansion();
     return () => {
       window.removeEventListener('wheel', handleWheelEvent);
       document.removeEventListener('touchmove', preventDefaultTouch);
@@ -1723,7 +1724,7 @@ export default function AleksPortfolio() {
           <span> through strategic </span><span className="execution">execution</span><span>.</span>
         </div>
 
-        <div className={firstExpandClass} onClick={() => toggleContent(true)} />
+        <div className={firstExpandClass} onClick={() => setExpansionLevel(expansionLevel + 1)} />
 
         <div className={`content-section ${expansionLevel >= 1 ? 'visible' : ''}`}>
           <div className="section-hint">Leadership & Scale</div>
@@ -1732,7 +1733,7 @@ export default function AleksPortfolio() {
           </p>
         </div>
 
-        <div className={`content-section ${expansionLevel >= 2 ? 'visible' : ''}`} onClick={() => expansionLevel >= 2 && setExpansionLevel(3)}>
+        <div className={`content-section ${expansionLevel >= 2 ? 'visible' : ''}`} onClick={() => setExpansionLevel(3)}>
           <div className="section-hint">Current Work</div>
           <p>
           At my current role as a Strategic Program Manager, I align industrial design, mechanical, electrical, firmware, UX, and brand teams around a unified roadmap. I own schedules, budgets, and risk plans for products shipping into medical, robotics, and wearable markets, serving founders fresh off seed rounds as well as multinational enterprises launching next‑gen lines.
@@ -1848,12 +1849,12 @@ export default function AleksPortfolio() {
         </div>
       </div>
 
-      {contactDiscovered && expansionLevel < 3 && (
-        <div className={`contact-bar${!contactExpanded ? ' collapsed' : ''}`}>
-          <div className={`contact-content${!contactExpanded ? ' collapsed' : ''}`}>
+      {contactDiscovered && (expansionLevel < 3 || contactCompressing || contactExpanding) && (
+        <div className={`contact-bar ${!contactExpanded ? 'collapsed' : ''} ${contactCompressing ? 'compressing' : ''} ${contactExpanding ? 'expanding' : ''}`}>
+          <div className={`contact-content ${!contactExpanded ? 'collapsed' : ''}`}>
             <button 
               type="button" 
-              className={`email-button${!contactExpanded ? ' collapsed' : ''}`}
+              className={`email-button ${!contactExpanded ? 'collapsed' : ''}`}
               onClick={() => window.location.href = 'mailto:aleksandertsatskin@gmail.com'}
             >
               <svg className="button-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -1861,8 +1862,8 @@ export default function AleksPortfolio() {
                 <polyline points="22,6 12,13 2,6"></polyline>
               </svg>
             </button>
-            <div className={`social-divider${!contactExpanded ? ' collapsed' : ''}`}></div>
-            <div className={`social-links${!contactExpanded ? ' collapsed' : ''}`}>
+            <div className={`social-divider ${!contactExpanded ? 'collapsed' : ''}`}></div>
+            <div className={`social-links ${!contactExpanded ? 'collapsed' : ''}`}>
               <button
                 type="button"
                 className="social-icon linkedin-icon"
