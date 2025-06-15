@@ -1705,6 +1705,8 @@ export default function AleksPortfolio() {
             width: 75%;
           }
         }
+
+        .contact-bar.pushed { transform: translateX(-50%) translateY(120%); opacity: 1; visibility: visible; transition: transform 0.8s cubic-bezier(0.23, 1, 0.32, 1); }
       `}</style>
 
       <div className="top-gradient" />
@@ -1849,8 +1851,8 @@ export default function AleksPortfolio() {
         </div>
       </div>
 
-      {contactDiscovered && (expansionLevel < 3 || contactCompressing || contactExpanding) && (
-        <div className={`contact-bar ${!contactExpanded ? 'collapsed' : ''} ${contactCompressing ? 'compressing' : ''} ${contactExpanding ? 'expanding' : ''}`}>
+      {(contactDiscovered || contactCompressing || contactExpanding) && (
+        <div className={`contact-bar ${!contactExpanded ? 'collapsed' : ''} ${contactCompressing ? 'compressing' : ''} ${contactExpanding ? 'expanding' : ''} ${expansionLevel >= 3 ? 'pushed' : ''}`}>
           <div className={`contact-content ${!contactExpanded ? 'collapsed' : ''}`}>
             <button 
               type="button" 
