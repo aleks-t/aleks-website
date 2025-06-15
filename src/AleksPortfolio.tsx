@@ -160,7 +160,7 @@ export default function AleksPortfolio() {
 
   const handleWheel = (event: WheelEvent) => {
     const now = Date.now();
-    const wheelDelay = 1200;
+    const wheelDelay = 800;
     
     if (isAnimating.current || now - lastWheelTime.current < wheelDelay) {
       return;
@@ -182,7 +182,7 @@ export default function AleksPortfolio() {
 
     setTimeout(() => {
       isAnimating.current = false;
-    }, 700);
+    }, 500);
     
     event.preventDefault();
   };
