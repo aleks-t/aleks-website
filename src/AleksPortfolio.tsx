@@ -12,7 +12,7 @@ export default function AleksPortfolio() {
   const [currentTime, setCurrentTime] = useState("");
   const [weatherEmoji, setWeatherEmoji] = useState("🔍");
   const [contactExpanded, setContactExpanded] = useState(false);
-  const [contactDiscovered, setContactDiscovered] = useState(false);
+  const [contactDiscovered, setContactDiscovered] = useState(true);
   const [formStatus, setFormStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [formMessage, setFormMessage] = useState('');
   
@@ -1848,7 +1848,7 @@ export default function AleksPortfolio() {
         </div>
       </div>
 
-      {contactDiscovered && (expansionLevel < 3) && (
+      {contactDiscovered && expansionLevel < 3 && (
         <div className={`contact-bar${!contactExpanded ? ' collapsed' : ''}`}>
           <div className={`contact-content${!contactExpanded ? ' collapsed' : ''}`}>
             <button 
