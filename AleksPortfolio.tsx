@@ -21,6 +21,7 @@ export default function AleksPortfolio() {
   const timelineRef = useRef(null);
   const touchStartY = useRef(0);
   const lastTouchTime = useRef(0);
+  const prevExpansionLevel = useRef(0);
 
   const CONFIG = {
     ZIP_CODE: '94132',
@@ -59,7 +60,7 @@ export default function AleksPortfolio() {
     },
     {
       year: '2017',
-      description: 'Graduated SJSU with B.S. in Industrial Design. Named IDSA \'17 Finalist for systematic approach to design challenges and cross-functional collaboration.'
+      description: "Graduated from SJSU with a B.S. in Industrial Design; IDSA '17 Student Merit Award Finalist."
     },
     {
       year: '2021',
@@ -170,8 +171,14 @@ export default function AleksPortfolio() {
 
     if (isScrollingDown && expansionLevel < 4) {
       toggleContent(true);
+      if (expansionLevel >= 2) {
+        setContactExpanded(false);
+      }
     } else if (!isScrollingDown && expansionLevel > 0) {
       toggleContent(false);
+      if (expansionLevel >= 2) {
+        setContactExpanded(true);
+      }
     } else {
       isAnimating.current = false;
       return;
@@ -190,7 +197,7 @@ export default function AleksPortfolio() {
 
   const handleTouchEnd = (event: React.TouchEvent) => {
     const now = Date.now();
-    const touchDelay = 1200;
+    const touchDelay = 700;
     
     if (isAnimating.current || now - lastTouchTime.current < touchDelay) {
       return;
@@ -198,9 +205,8 @@ export default function AleksPortfolio() {
 
     const touchEndY = event.changedTouches[0].clientY;
     const deltaY = touchStartY.current - touchEndY;
-    const minSwipeDistance = 50; // Minimum distance to trigger swipe
+    const minSwipeDistance = 50;
 
-    // Only trigger if swipe is long enough
     if (Math.abs(deltaY) < minSwipeDistance) {
       return;
     }
@@ -221,7 +227,7 @@ export default function AleksPortfolio() {
 
     setTimeout(() => {
       isAnimating.current = false;
-    }, 700);
+    }, 500);
     
     event.preventDefault();
   };
@@ -296,53 +302,36 @@ export default function AleksPortfolio() {
     }
   };
 
-  const handleExpansion = () => {
-    if (expansionLevel >= 0) {
-      setContactDiscovered(true);
-      if (expansionLevel >= 3) {
-        // Expand to show both email and LinkedIn at level 3
-        setContactExpanded(true);
-      } else {
-        // Show just email button (collapsed) at levels 0-2
-        setContactExpanded(false);
-      }
-    } else {
-      setContactDiscovered(false);
-      setContactExpanded(false);
-    }
-  };
-
-
-
   useEffect(() => {
     setWeatherAnimationStarted(true);
     fetchWeather();
-    
-    // Initialize timeline to first position
     setMousePosition(0);
     setTimelineText(timelineData[0].description);
-    
     updateTime();
     const timeInterval = setInterval(updateTime, 60000);
-    
     const handleWheelEvent = (e: WheelEvent) => handleWheel(e);
     window.addEventListener('wheel', handleWheelEvent, { passive: false });
-    
-    // Prevent default touch behavior on the document to avoid scroll conflicts
     const preventDefaultTouch = (e: TouchEvent) => {
-      if (e.touches.length > 1) return; // Allow pinch zoom
+      if (e.touches.length > 1) return;
       e.preventDefault();
     };
-    
     document.addEventListener('touchmove', preventDefaultTouch, { passive: false });
-    
-    handleExpansion();
-    
     return () => {
       window.removeEventListener('wheel', handleWheelEvent);
       document.removeEventListener('touchmove', preventDefaultTouch);
       clearInterval(timeInterval);
     };
+  }, [expansionLevel]);
+
+  useEffect(() => {
+    // Show bar for levels 0-2, hide for 3+
+    if (expansionLevel < 3) {
+      setContactDiscovered(true);
+      setContactExpanded(expansionLevel > 0); // expanded for 1,2; collapsed for 0
+    } else {
+      setContactDiscovered(false);
+      setContactExpanded(false);
+    }
   }, [expansionLevel]);
 
   const mainContentClass = `main-content ${expansionLevel > 0 ? `expanded-${expansionLevel}` : ''}`;
@@ -1334,6 +1323,9 @@ export default function AleksPortfolio() {
 
         .linkedin-icon {
           color: #0077b5;
+          background: none;
+          border: none;
+          cursor: pointer;
         }
 
         .linkedin-icon:hover {
@@ -1729,7 +1721,7 @@ export default function AleksPortfolio() {
 
       <div className={mainContentClass} data-expansion={expansionLevel}>
         <div className="mobile-text">
-          <p>Hi, I'm Aleks — I turn ambitious ideas into reality through strategic execution.</p>
+          <p>Hi, I'm Aleks — I help turn ambitious ideas into reality through strategic execution.</p>
         </div>
         
         <div className="desktop-text">
@@ -1737,7 +1729,7 @@ export default function AleksPortfolio() {
           <span>I'm </span>
           <span className="name relative">Aleks</span>
           <span>— </span>
-          <span>I turn ambitious ideas into </span>
+          <span>I help turn ambitious ideas into </span>
           <span className="vision">reality</span>
           <span> through strategic </span><span className="execution">execution</span><span>.</span>
         </div>
@@ -1751,10 +1743,10 @@ export default function AleksPortfolio() {
           </p>
         </div>
 
-        <div className={`content-section ${expansionLevel >= 2 ? 'visible' : ''}`}>
+        <div className={`content-section ${expansionLevel >= 2 ? 'visible' : ''}`} onClick={() => expansionLevel >= 2 && setExpansionLevel(3)}>
           <div className="section-hint">Current Work</div>
           <p>
-          As Card79's Strategic Program Manager, I align industrial design, mechanical, electrical, firmware, UX, and brand teams around a unified roadmap. I own schedules, budgets, and risk plans for products shipping into medical, robotics, and wearable markets, serving founders fresh off seed rounds as well as multinational enterprises launching next‑gen lines.
+          At my current role as a Strategic Program Manager, I align industrial design, mechanical, electrical, firmware, UX, and brand teams around a unified roadmap. I own schedules, budgets, and risk plans for products shipping into medical, robotics, and wearable markets, serving founders fresh off seed rounds as well as multinational enterprises launching next‑gen lines.
           </p>
         </div>
 
@@ -1867,30 +1859,33 @@ export default function AleksPortfolio() {
         </div>
       </div>
 
-      {contactDiscovered && expansionLevel < 3 && (
-        <div className={`contact-bar ${!contactExpanded ? 'collapsed' : ''}`}>
-          <div className={`contact-content ${!contactExpanded ? 'collapsed' : ''}`}>
+      {contactDiscovered && (
+        <div className={`contact-bar${!contactExpanded ? ' collapsed' : ''}`}>
+          <div className={`contact-content${!contactExpanded ? ' collapsed' : ''}`}>
             <button 
               type="button" 
-              className={`email-button ${!contactExpanded ? 'collapsed' : ''}`}
-              onClick={() => setExpansionLevel(4)}
+              className={`email-button${!contactExpanded ? ' collapsed' : ''}`}
+              onClick={() => window.location.href = 'mailto:aleksandertsatskin@gmail.com'}
             >
               <svg className="button-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
                 <polyline points="22,6 12,13 2,6"></polyline>
               </svg>
             </button>
-            
-            <div className={`social-divider ${!contactExpanded ? 'collapsed' : ''}`}></div>
-            
-            <div className={`social-links ${!contactExpanded ? 'collapsed' : ''}`}>
-              <a href="https://linkedin.com/in/your-profile" target="_blank" rel="noopener noreferrer" className="social-icon linkedin-icon" title="LinkedIn">
+            <div className={`social-divider${!contactExpanded ? ' collapsed' : ''}`}></div>
+            <div className={`social-links${!contactExpanded ? ' collapsed' : ''}`}>
+              <button
+                type="button"
+                className="social-icon linkedin-icon"
+                onClick={() => window.open('https://www.linkedin.com/in/aleksander-tsatskin-63167125', '_blank')}
+                title="LinkedIn Profile"
+              >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="#0077b5" stroke="none">
                   <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
                   <rect x="2" y="9" width="4" height="12"></rect>
                   <circle cx="4" cy="4" r="2"></circle>
                 </svg>
-              </a>
+              </button>
             </div>
           </div>
         </div>
