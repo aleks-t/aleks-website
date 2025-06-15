@@ -13,8 +13,6 @@ export default function AleksPortfolio() {
   const [weatherEmoji, setWeatherEmoji] = useState("🔍");
   const [contactExpanded, setContactExpanded] = useState(false);
   const [contactDiscovered, setContactDiscovered] = useState(false);
-  const [contactCompressing, setContactCompressing] = useState(false);
-  const [contactExpanding, setContactExpanding] = useState(false);
   const [formStatus, setFormStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [formMessage, setFormMessage] = useState('');
   
@@ -160,7 +158,7 @@ export default function AleksPortfolio() {
 
   const handleWheel = (event: WheelEvent) => {
     const now = Date.now();
-    const wheelDelay = 800;
+    const wheelDelay = 1200;
     
     if (isAnimating.current || now - lastWheelTime.current < wheelDelay) {
       return;
@@ -188,7 +186,7 @@ export default function AleksPortfolio() {
 
     setTimeout(() => {
       isAnimating.current = false;
-    }, 500);
+    }, 700);
     
     event.preventDefault();
   };
@@ -199,7 +197,7 @@ export default function AleksPortfolio() {
 
   const handleTouchEnd = (event: React.TouchEvent) => {
     const now = Date.now();
-    const touchDelay = 1200;
+    const touchDelay = 700;
     
     if (isAnimating.current || now - lastTouchTime.current < touchDelay) {
       return;
@@ -207,9 +205,8 @@ export default function AleksPortfolio() {
 
     const touchEndY = event.changedTouches[0].clientY;
     const deltaY = touchStartY.current - touchEndY;
-    const minSwipeDistance = 50; // Minimum distance to trigger swipe
+    const minSwipeDistance = 50;
 
-    // Only trigger if swipe is long enough
     if (Math.abs(deltaY) < minSwipeDistance) {
       return;
     }
@@ -230,7 +227,7 @@ export default function AleksPortfolio() {
 
     setTimeout(() => {
       isAnimating.current = false;
-    }, 700);
+    }, 500);
     
     event.preventDefault();
   };
@@ -305,78 +302,20 @@ export default function AleksPortfolio() {
     }
   };
 
-  const handleExpansion = () => {
-    const prevLevel = prevExpansionLevel.current;
-    
-    if (expansionLevel >= 0) {
-      setContactDiscovered(true);
-      
-      // Handle compression animation when transitioning from level 2 to level 3 (before timeline appears)
-      if (expansionLevel === 3 && prevLevel === 2 && contactDiscovered && !contactCompressing) {
-        setContactCompressing(true);
-        setContactExpanded(false);
-        setContactExpanding(false);
-        // Reset compression state after animation completes
-        setTimeout(() => {
-          setContactCompressing(false);
-        }, 600);
-      } else if (expansionLevel < 3) {
-        setContactCompressing(false);
-        
-        // Handle expansion animation when coming back from level 3+ to level 2
-        if (expansionLevel === 2 && prevLevel >= 3 && !contactExpanding) {
-          setContactExpanding(true);
-          // Reset expansion state after animation completes
-          setTimeout(() => {
-            setContactExpanding(false);
-          }, 600);
-        }
-      }
-      
-      if (expansionLevel >= 1 && expansionLevel < 3 && !contactCompressing) {
-        // Expand to show both email and LinkedIn at levels 1-2 (unless compressing)
-        setContactExpanded(true);
-      } else {
-        // Show just email button (collapsed) at level 0 or hide at level 3+
-        setContactExpanded(false);
-      }
-    } else {
-      setContactDiscovered(false);
-      setContactExpanded(false);
-      setContactCompressing(false);
-      setContactExpanding(false);
-    }
-    
-    // Update previous level for next comparison
-    prevExpansionLevel.current = expansionLevel;
-  };
-
-
-
   useEffect(() => {
     setWeatherAnimationStarted(true);
     fetchWeather();
-    
-    // Initialize timeline to first position
     setMousePosition(0);
     setTimelineText(timelineData[0].description);
-    
     updateTime();
     const timeInterval = setInterval(updateTime, 60000);
-    
     const handleWheelEvent = (e: WheelEvent) => handleWheel(e);
     window.addEventListener('wheel', handleWheelEvent, { passive: false });
-    
-    // Prevent default touch behavior on the document to avoid scroll conflicts
     const preventDefaultTouch = (e: TouchEvent) => {
-      if (e.touches.length > 1) return; // Allow pinch zoom
+      if (e.touches.length > 1) return;
       e.preventDefault();
     };
-    
     document.addEventListener('touchmove', preventDefaultTouch, { passive: false });
-    
-    handleExpansion();
-    
     return () => {
       window.removeEventListener('wheel', handleWheelEvent);
       document.removeEventListener('touchmove', preventDefaultTouch);
@@ -1208,67 +1147,6 @@ export default function AleksPortfolio() {
           min-width: 3rem;
         }
 
-        .contact-bar.compressing {
-          animation: compressAndDisappear 0.6s cubic-bezier(0.4, 0, 1, 1) forwards;
-        }
-
-        .contact-bar.expanding {
-          animation: expandAndAppear 0.6s cubic-bezier(0, 0, 0.2, 1) forwards;
-          transform-origin: center center !important;
-          left: 50% !important;
-          margin-left: 0 !important;
-          position: fixed !important;
-        }
-
-        @keyframes compressAndDisappear {
-          0% {
-            transform: translateX(-50%) translateY(0) scaleX(1) scaleY(1);
-            opacity: 1;
-          }
-          30% {
-            transform: translateX(-50%) translateY(0) scaleX(0.7) scaleY(1.1);
-            opacity: 0.8;
-          }
-          60% {
-            transform: translateX(-50%) translateY(0) scaleX(0.3) scaleY(0.8);
-            opacity: 0.4;
-          }
-          100% {
-            transform: translateX(-50%) translateY(10px) scaleX(0) scaleY(0);
-            opacity: 0;
-            visibility: hidden;
-          }
-        }
-
-        @keyframes expandAndAppear {
-          0% {
-            transform: translateX(-50%) translateY(10px) scale(0) !important;
-            opacity: 0;
-            visibility: visible;
-            left: 50% !important;
-            margin-left: 0 !important;
-          }
-          40% {
-            transform: translateX(-50%) translateY(0) scale(0.3) !important;
-            opacity: 0.4;
-            left: 50% !important;
-            margin-left: 0 !important;
-          }
-          70% {
-            transform: translateX(-50%) translateY(0) scaleX(0.7) scaleY(1.1) !important;
-            opacity: 0.8;
-            left: 50% !important;
-            margin-left: 0 !important;
-          }
-          100% {
-            transform: translateX(-50%) translateY(0) scale(1) !important;
-            opacity: 1;
-            visibility: visible;
-            left: 50% !important;
-            margin-left: 0 !important;
-          }
-        }
-
         .email-button::before {
           content: '';
           position: absolute;
@@ -1970,12 +1848,12 @@ export default function AleksPortfolio() {
         </div>
       </div>
 
-      {contactDiscovered && (expansionLevel < 3 || contactCompressing || contactExpanding) && (
-        <div className={`contact-bar ${!contactExpanded ? 'collapsed' : ''} ${contactCompressing ? 'compressing' : ''} ${contactExpanding ? 'expanding' : ''}`}>
-          <div className={`contact-content ${!contactExpanded ? 'collapsed' : ''}`}>
+      {contactDiscovered && (expansionLevel < 3) && (
+        <div className={`contact-bar${!contactExpanded ? ' collapsed' : ''}`}>
+          <div className={`contact-content${!contactExpanded ? ' collapsed' : ''}`}>
             <button 
               type="button" 
-              className={`email-button ${!contactExpanded ? 'collapsed' : ''}`}
+              className={`email-button${!contactExpanded ? ' collapsed' : ''}`}
               onClick={() => window.location.href = 'mailto:aleksandertsatskin@gmail.com'}
             >
               <svg className="button-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -1983,10 +1861,8 @@ export default function AleksPortfolio() {
                 <polyline points="22,6 12,13 2,6"></polyline>
               </svg>
             </button>
-            
-            <div className={`social-divider ${!contactExpanded ? 'collapsed' : ''}`}></div>
-            
-            <div className={`social-links ${!contactExpanded ? 'collapsed' : ''}`}>
+            <div className={`social-divider${!contactExpanded ? ' collapsed' : ''}`}></div>
+            <div className={`social-links${!contactExpanded ? ' collapsed' : ''}`}>
               <button
                 type="button"
                 className="social-icon linkedin-icon"
