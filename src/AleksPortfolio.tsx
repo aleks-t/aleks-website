@@ -451,14 +451,14 @@ export default function AleksPortfolio() {
 
         .mobile-text {
           display: none;
-          font-size: clamp(1.3rem, 6vw, 1.8rem); /* Much larger: increased min to 1.3rem, vw to 6vw, max to 1.8rem */
+          font-size: clamp(1rem, 4.2vw, 1.3rem); /* More balanced: min 1rem, 4.2vw scaling, max 1.3rem */
           color: rgba(255, 255, 255, 0.85);
           margin: 1rem 2.5vw;
           max-width: 95vw;
           word-wrap: break-word;
           hyphens: auto;
           font-weight: 400;
-          line-height: 1.3; /* Slightly increased line-height for better readability with larger text */
+          line-height: 1.3;
           box-sizing: border-box;
         }
         
