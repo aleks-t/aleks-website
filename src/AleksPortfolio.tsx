@@ -449,19 +449,22 @@ export default function AleksPortfolio() {
           box-sizing: border-box;
         }
 
+/* Find this section in your CSS and replace it: */
+
         .mobile-text {
           display: none;
-          font-size: clamp(1rem, 4.2vw, 1.3rem); /* More balanced: min 1rem, 4.2vw scaling, max 1.3rem */
+          font-size: clamp(1rem, 4.2vw, 1.3rem); 
           color: rgba(255, 255, 255, 0.85);
           margin: 1rem 2.5vw;
           max-width: 95vw;
           word-wrap: break-word;
-          hyphens: auto;
+          hyphens: none; /* Disable hyphenation - no more dashes */
           font-weight: 400;
           line-height: 1.3;
           box-sizing: border-box;
         }
         
+        /* Add this new CSS rule to disable handwave on mobile and show mobile text: */
         @media (max-width: 768px) {
           .desktop-text {
             display: none !important; /* Hide desktop text on mobile */
@@ -469,6 +472,20 @@ export default function AleksPortfolio() {
           
           .mobile-text {
             display: block !important; /* Show mobile text on mobile */
+          }
+          
+          .content-section {
+            font-size: 0.85rem; /* Increase from 0.7rem to 0.85rem for better readability */
+            line-height: 1.5; /* Increase line height for better readability */
+          }
+          
+          .timeline-text {
+            font-size: 0.85rem; /* Increase from 0.7rem to 0.85rem */
+            line-height: 1.5;
+          }
+          
+          .section-hint {
+            font-size: 0.9rem; /* Increase from 0.8rem to 0.9rem */
           }
           
           .name:hover {
