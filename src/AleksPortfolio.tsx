@@ -451,7 +451,7 @@ export default function AleksPortfolio() {
 
         .mobile-text {
           display: none;
-          font-size: clamp(0.9rem, 4.5vw, 1.2rem);
+          font-size: clamp(1.1rem, 4.5vw, 1.4rem);
           color: rgba(255, 255, 255, 0.85);
           margin: 1rem 2.5vw;
           max-width: 95vw;
