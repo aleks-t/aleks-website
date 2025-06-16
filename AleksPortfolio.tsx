@@ -1707,6 +1707,20 @@ export default function AleksPortfolio() {
         }
 
         .contact-bar.pushed { transform: translateX(-50%) translateY(120%); opacity: 1; visibility: visible; transition: transform 0.8s cubic-bezier(0.23, 1, 0.32, 1); }
+        @media (max-width: 640px) {
+          .contact-bar.pushed {
+            left: 50%;
+            transform: translate(-50%, 50vh);
+            opacity: 0;
+            pointer-events: none;
+            transition: transform 0.8s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+          }
+          .contact-bar:not(.pushed) {
+            opacity: 1;
+            pointer-events: auto;
+            transition: transform 0.8s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+          }
+        }
       `}</style>
 
       <div className="top-gradient" />
