@@ -461,6 +461,30 @@ export default function AleksPortfolio() {
           line-height: 1.3; /* Slightly increased line-height for better readability with larger text */
           box-sizing: border-box;
         }
+        
+        @media (max-width: 768px) {
+          .desktop-text {
+            display: none !important; /* Hide desktop text on mobile */
+          }
+          
+          .mobile-text {
+            display: block !important; /* Show mobile text on mobile */
+          }
+          
+          .name:hover {
+            padding-right: 0; /* Disable padding change on mobile */
+          }
+          
+          .name::after {
+            display: none !important; /* Completely hide the handwave emoji on mobile */
+          }
+          
+          .name:hover::after {
+            display: none !important;
+            opacity: 0 !important;
+            animation: none !important;
+          }
+        }
 
         .name {
           position: relative;
