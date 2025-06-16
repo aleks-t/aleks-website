@@ -1113,17 +1113,42 @@ export default function AleksPortfolio() {
         .contact-bar.collapsed,
         .contact-bar.compressing,
         .contact-bar.expanding {
+          position: fixed;
           left: 50%;
-          transform: translateX(-50%);
-          margin-left: 0;
           right: auto;
+          margin: 0;
+          transform: translateX(-50%);
           width: auto;
           max-width: 20rem;
           min-width: 3rem;
+          z-index: 100;
         }
         .contact-bar.pushed {
+          position: fixed;
           left: 50%;
+          right: auto;
+          margin: 0;
           transform: translateX(-50%) translateY(200%);
+        }
+        @media (max-width: 640px) {
+          .contact-bar,
+          .contact-bar.collapsed,
+          .contact-bar.compressing,
+          .contact-bar.expanding,
+          .contact-bar.pushed {
+            min-width: 200px;
+            max-width: 90vw;
+            width: auto;
+            left: 50%;
+            right: auto;
+            margin: 0;
+            padding-left: 0;
+            padding-right: 0;
+            transform: translateX(-50%);
+          }
+          .contact-bar.pushed {
+            transform: translateX(-50%) translateY(200%);
+          }
         }
 
         .email-button::before {
