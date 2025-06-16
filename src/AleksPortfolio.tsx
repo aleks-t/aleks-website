@@ -13,8 +13,6 @@ export default function AleksPortfolio() {
   const [weatherEmoji, setWeatherEmoji] = useState("🔍");
   const [contactExpanded, setContactExpanded] = useState(false);
   const [contactDiscovered, setContactDiscovered] = useState(false);
-  const [contactCompressing, setContactCompressing] = useState(false);
-  const [contactExpanding, setContactExpanding] = useState(false);
   const [formStatus, setFormStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [formMessage, setFormMessage] = useState('');
   
@@ -125,41 +123,37 @@ export default function AleksPortfolio() {
     }
   };
 
-  const handleExpansion = () => {
-    const prevLevel = prevExpansionLevel.current;
-
-    if (expansionLevel >= 0) {
-      setContactDiscovered(true);
-
-      // For level 3, just hide the bar (no compressing animation)
-      if (expansionLevel === 3 && prevLevel === 2) {
-        setContactCompressing(false);
-        setContactExpanded(false);
-        setContactExpanding(false);
-      } else if (expansionLevel < 3) {
-        setContactCompressing(false);
-        // Handle expansion animation when coming back from level 3+ to level 2
-        if (expansionLevel === 2 && prevLevel >= 3 && !contactExpanding) {
-          setContactExpanding(true);
-          setTimeout(() => {
-            setContactExpanding(false);
-          }, 600);
+  const toggleContent = (expand: boolean) => {
+    if (expand && expansionLevel < 4) {
+      const newLevel = expansionLevel + 1;
+      setExpansionLevel(newLevel);
+      
+      if (newLevel === 1) {
+        setShowWeatherOnMobile(true);
+        if (window.innerWidth <= 640 && !weatherAnimationStarted) {
+          setWeatherAnimationStarted(true);
+          if (!weatherAnimationCompleted) {
+            fetchWeather();
+          }
         }
       }
-
-      if (expansionLevel >= 1 && expansionLevel < 3 && !contactCompressing) {
-        setContactExpanded(true);
-      } else {
-        setContactExpanded(false);
+      
+      // Restart weather animation when reaching contact form on mobile
+      if (newLevel === 4 && window.innerWidth <= 768) {
+        setIsLoading(true);
+        setWeatherAnimationCompleted(false);
+        setLocation("Finding Aleks");
+        setWeatherEmoji("🔍");
+        fetchWeather();
       }
-    } else {
-      setContactDiscovered(false);
-      setContactExpanded(false);
-      setContactCompressing(false);
-      setContactExpanding(false);
+    } else if (!expand && expansionLevel > 0) {
+      const newLevel = expansionLevel - 1;
+      setExpansionLevel(newLevel);
+      
+      if (newLevel === 0) {
+        setShowWeatherOnMobile(false);
+      }
     }
-
-    prevExpansionLevel.current = expansionLevel;
   };
 
   const handleWheel = (event: WheelEvent) => {
@@ -176,9 +170,15 @@ export default function AleksPortfolio() {
     lastWheelTime.current = now;
 
     if (isScrollingDown && expansionLevel < 4) {
-      setExpansionLevel(expansionLevel + 1);
+      toggleContent(true);
+      if (expansionLevel >= 2) {
+        setContactExpanded(false);
+      }
     } else if (!isScrollingDown && expansionLevel > 0) {
-      setExpansionLevel(expansionLevel - 1);
+      toggleContent(false);
+      if (expansionLevel >= 2) {
+        setContactExpanded(true);
+      }
     } else {
       isAnimating.current = false;
       return;
@@ -217,9 +217,9 @@ export default function AleksPortfolio() {
     lastTouchTime.current = now;
 
     if (isSwipingUp && expansionLevel < 4) {
-      setExpansionLevel(expansionLevel + 1);
+      toggleContent(true);
     } else if (!isSwipingUp && expansionLevel > 0) {
-      setExpansionLevel(expansionLevel - 1);
+      toggleContent(false);
     } else {
       isAnimating.current = false;
       return;
@@ -300,6 +300,33 @@ export default function AleksPortfolio() {
         setFormMessage('');
       }, 5000);
     }
+  };
+
+  const handleExpansion = () => {
+    const prevLevel = prevExpansionLevel.current;
+    if (expansionLevel >= 0) {
+      setContactDiscovered(true);
+      // Only do compress/expand for transitions between 0-2
+      if (expansionLevel === 3 && prevLevel === 2) {
+        // Just hide the bar with a slide (no compress)
+        setContactExpanded(false);
+      } else if (expansionLevel < 3) {
+        // Only expand animation if coming back from 3+ to 2
+        if (expansionLevel === 2 && prevLevel >= 3) {
+          setContactExpanded(false);
+        }
+      }
+      // Expanded for 1 and 2, collapsed for 0
+      if (expansionLevel >= 1 && expansionLevel < 3) {
+        setContactExpanded(true);
+      } else {
+        setContactExpanded(false);
+      }
+    } else {
+      setContactDiscovered(false);
+      setContactExpanded(false);
+    }
+    prevExpansionLevel.current = expansionLevel;
   };
 
   useEffect(() => {
@@ -404,6 +431,8 @@ export default function AleksPortfolio() {
             transform: translateY(-90vh);
           }
         }
+
+
 
         .desktop-text {
           display: block;
@@ -1107,11 +1136,601 @@ export default function AleksPortfolio() {
           transform: translateX(0) !important;
         }
 
-        .contact-bar-wrapper { display: flex; justify-content: center; }
+        .contact-bar {
+          position: fixed;
+          bottom: var(--safe-area-bottom);
+          left: 50%;
+          transform: translateX(-50%) translateY(100%);
+          width: auto;
+          max-width: 20rem;
+          min-width: 3rem;
+          height: 3rem;
+          background: rgba(20, 20, 20, 0.8);
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          border-radius: 1.5rem;
+          backdrop-filter: blur(12px);
+          z-index: 100;
+          opacity: 0;
+          visibility: hidden;
+          transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .contact-bar:not(.collapsed) {
+          transform: translateX(-50%) translateY(0);
+          opacity: 1;
+          visibility: visible;
+        }
+
+        .contact-bar.collapsed {
+          transform: translateX(-50%) translateY(0);
+          opacity: 1;
+          visibility: visible;
+          padding: 0.2rem;
+          width: 3rem;
+          height: 2.8rem;
+          min-width: 3rem;
+        }
+
+        .email-button::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+          transition: left 0.5s ease;
+        }
+
+        .email-button:hover::before {
+          left: 100%;
+        }
+
+        .email-button:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+          border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .email-button:hover .button-icon {
+          transform: translateX(2px);
+        }
+
+        .contact-content {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.8rem;
+          transition: gap 3s cubic-bezier(0.23, 1, 0.32, 1);
+          white-space: nowrap;
+          opacity: 1;
+        }
+
+        .contact-content.collapsed {
+          gap: 0;
+          opacity: 1;
+        }
+
+        .email-button {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          padding: 0.65rem;
+          border-radius: 1.5rem;
+          text-decoration: none;
+          font-weight: 500;
+          font-size: 0.85rem;
+          transition: all 3s cubic-bezier(0.23, 1, 0.32, 1);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          position: relative;
+          overflow: hidden;
+          width: 2.6rem;
+          height: 2.4rem;
+          cursor: pointer;
+        }
+
+        .email-button.collapsed {
+          padding: 0.65rem;
+          width: 2.6rem;
+          height: 2.4rem;
+          display: flex !important;
+          justify-content: center !important;
+          align-items: center !important;
+          border-radius: 1.3rem;
+        }
+
+        .button-icon {
+          position: relative;
+          z-index: 1;
+          transition: all 0.3s ease;
+          flex-shrink: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          opacity: 1;
+        }
+
+        .social-divider {
+          width: 1px;
+          height: 1.8rem;
+          background: rgba(255, 255, 255, 0.2);
+          transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+          opacity: 1;
+          transform: scaleX(1);
+          margin: 0 0.4rem;
+        }
+
+        .social-divider.collapsed {
+          opacity: 0;
+          transform: scaleX(0);
+          width: 0;
+          margin: 0;
+        }
+
+        .social-links {
+          display: flex;
+          gap: 0.8rem;
+          transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+          opacity: 1;
+          transform: scale(1);
+          width: auto;
+          max-width: 60px;
+          overflow: hidden;
+        }
+
+        .social-links.collapsed {
+          opacity: 0;
+          transform: scale(0.9);
+          width: 0;
+          max-width: 0;
+          gap: 0;
+          margin: 0;
+        }
+
+        .social-icon {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0.65rem;
+          border-radius: 1.5rem;
+          background: rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          color: rgba(255, 255, 255, 0.9);
+          text-decoration: none;
+          font-weight: 500;
+          font-size: 0.85rem;
+          white-space: nowrap;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          position: relative;
+          overflow: hidden;
+          width: 2.6rem;
+          height: 2.4rem;
+        }
+
+        .social-icon::before {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: 0;
+          height: 0;
+          background: rgba(255, 255, 255, 0.15);
+          border-radius: 1.5rem;
+          transform: translate(-50%, -50%);
+          transition: all 0.3s ease;
+        }
+
+        .social-icon:hover::before {
+          width: 100%;
+          height: 100%;
+        }
+
+        .social-icon:hover {
+          transform: translateY(-3px);
+          border-color: rgba(255, 255, 255, 0.4);
+          background: rgba(255, 255, 255, 0.12);
+          color: rgba(255, 255, 255, 1);
+        }
+
+        .linkedin-icon {
+          color: #0077b5;
+          background: none;
+          border: none;
+          cursor: pointer;
+        }
+
+        .linkedin-icon:hover {
+          color: #0077b5;
+          border-color: rgba(0, 119, 181, 0.3);
+          background: rgba(0, 119, 181, 0.1);
+        }
+
         @media (max-width: 640px) {
-          .contact-bar-wrapper { position: fixed; left: 0; right: 0; bottom: 1.5rem; z-index: 999; }
-          .contact-bar-wrapper.hidden { display: none !important; }
-          .contact-bar { display: inline-flex; width: auto; max-width: 90vw; border-radius: 1.5rem; padding: 0.6rem 1.2rem; }
+          .contact-bar {
+            bottom: 1.5rem;
+            padding: 0.6rem 1.2rem;
+            height: 3.2rem;
+          }
+
+          .contact-bar.collapsed {
+            padding: 0.4rem;
+            width: 3.6rem;
+            height: 2.8rem;
+            min-width: 3.6rem;
+          }
+
+          .email-button {
+            padding: 0.65rem;
+            width: 2.6rem;
+            height: 2.4rem;
+          }
+
+          .email-button.collapsed {
+            padding: 0.65rem;
+            width: 2.6rem;
+            height: 2.4rem;
+          }
+
+          .social-icon {
+            padding: 0.65rem;
+            width: 2.6rem;
+            height: 2.4rem;
+          }
+
+          .button-icon, .social-icon svg {
+            width: 20px;
+            height: 20px;
+          }
+        }
+
+        .social-container {
+          display: none;
+        }
+
+        .location-emoji.finding-animation {
+          animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+          0%, 100% { 
+            opacity: 0.8; 
+            transform: scale(1);
+          }
+          50% { 
+            opacity: 1; 
+            transform: scale(1.1);
+          }
+        }
+
+        .weather-container.pin-only .weather-content {
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+        }
+
+        .weather-container.pin-only .weather-content .location-pin {
+          display: block !important;
+          opacity: 1 !important;
+          visibility: visible !important;
+          width: auto !important;
+          height: auto !important;
+          overflow: visible !important;
+          color: rgba(255, 255, 255, 0.9) !important;
+          font-size: 1rem !important;
+          line-height: 1 !important;
+          z-index: 1000 !important;
+          position: relative !important;
+        }
+
+        .weather-container.pin-only .location-emoji {
+          display: none !important;
+          opacity: 0 !important;
+          width: 0 !important;
+          overflow: hidden !important;
+        }
+
+        .weather-container.pin-only .time-separator {
+          display: block !important;
+          opacity: 0 !important;
+          visibility: hidden !important;
+          width: 0 !important;
+          margin: 0 !important;
+          transform: scaleX(0);
+          transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .weather-container.pin-only .time-text {
+          display: block !important;
+          opacity: 0 !important;
+          visibility: hidden !important;
+          max-width: 0 !important;
+          overflow: hidden !important;
+          white-space: nowrap;
+          transform: translateX(-20px);
+          transition: all 0.9s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .weather-container.pin-only:hover .time-separator {
+          opacity: 1 !important;
+          visibility: visible !important;
+          width: 3px !important;
+          height: 3px !important;
+          background: rgba(255, 255, 255, 0.5) !important;
+          border-radius: 50% !important;
+          margin: 0 0.4rem !important;
+          transform: scaleX(1) !important;
+          transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1) 0.3s;
+        }
+
+        .weather-container.pin-only:hover .time-text {
+          opacity: 1 !important;
+          visibility: visible !important;
+          max-width: 100px !important;
+          overflow: visible !important;
+          font-size: 0.75rem !important;
+          color: rgba(255, 255, 255, 0.8) !important;
+          transform: translateX(0) !important;
+          transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1) 0.4s;
+        }
+
+        .weather-container.pin-only:hover .location-text {
+          display: block !important;
+          opacity: 1 !important;
+          visibility: visible !important;
+          width: auto !important;
+          overflow: visible !important;
+          margin-left: 0.5rem !important;
+        }
+
+        .contact-form {
+          opacity: 0;
+          visibility: hidden;
+          width: 92vw;
+          max-width: 32rem;
+          margin: 1rem auto 2rem auto;
+          padding: 1.2rem;
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          border-radius: 12px;
+          backdrop-filter: blur(20px);
+          transition: all 1s cubic-bezier(0.23, 1, 0.32, 1);
+          transform: translateY(30px);
+          box-sizing: border-box;
+          max-height: 80vh;
+          overflow-y: auto;
+        }
+
+
+
+        @media (max-width: 480px) {
+          .contact-form {
+            width: 92vw;
+            padding: 0.6rem;
+            max-height: 85vh;
+            font-size: 0.85rem;
+          }
+        }
+
+        .contact-form.visible {
+          opacity: 1;
+          visibility: visible;
+          transform: translateY(0);
+        }
+
+        .contact-form .form-title {
+          font-size: 0.9rem;
+          color: rgba(255, 255, 255, 0.4);
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          margin-bottom: 1.5rem;
+          text-align: center;
+          font-weight: 500;
+        }
+
+        .contact-form .form-group {
+          margin-bottom: 1.2rem;
+        }
+
+        .contact-form label {
+          display: block;
+          font-size: 0.75rem;
+          color: rgba(255, 255, 255, 0.6);
+          margin-bottom: 0.5rem;
+          font-weight: 500;
+          letter-spacing: 0.02em;
+        }
+
+        .contact-form input,
+        .contact-form textarea {
+          width: 100%;
+          padding: 0.8rem 1rem;
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          border-radius: 8px;
+          color: rgba(255, 255, 255, 0.9);
+          font-size: 0.8rem;
+          font-family: inherit;
+          transition: all 0.3s ease;
+          box-sizing: border-box;
+          resize: none;
+        }
+
+        @media (max-width: 768px) {
+          .contact-form input,
+          .contact-form textarea {
+            padding: 0.6rem 0.8rem;
+            font-size: 0.85rem;
+          }
+          
+          .contact-form textarea {
+            min-height: 70px;
+            max-height: 90px;
+          }
+          
+          .contact-form .form-group {
+            margin-bottom: 0.8rem;
+          }
+          
+          .contact-form .form-title {
+            font-size: 0.8rem;
+            margin-bottom: 1rem;
+          }
+          
+          .contact-form label {
+            font-size: 0.7rem;
+            margin-bottom: 0.4rem;
+          }
+          
+          .contact-form .submit-button {
+            padding: 0.8rem 1.2rem;
+            font-size: 0.75rem;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .contact-form input,
+          .contact-form textarea {
+            padding: 0.5rem 0.7rem;
+            font-size: 0.8rem;
+          }
+          
+          .contact-form textarea {
+            min-height: 60px;
+            max-height: 80px;
+          }
+          
+          .contact-form .form-group {
+            margin-bottom: 0.7rem;
+          }
+          
+          .contact-form .form-title {
+            font-size: 0.75rem;
+            margin-bottom: 0.8rem;
+          }
+          
+          .contact-form label {
+            font-size: 0.65rem;
+            margin-bottom: 0.3rem;
+          }
+          
+          .contact-form .submit-button {
+            padding: 0.7rem 1rem;
+            font-size: 0.7rem;
+          }
+        }
+
+        .contact-form input:focus,
+        .contact-form textarea:focus {
+          outline: none;
+          border-color: rgba(255, 255, 255, 0.3);
+          background: rgba(255, 255, 255, 0.08);
+          box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+        }
+
+        .contact-form input::placeholder,
+        .contact-form textarea::placeholder {
+          color: rgba(255, 255, 255, 0.4);
+        }
+
+        .contact-form textarea {
+          min-height: 100px;
+          max-height: 150px;
+        }
+
+        .contact-form .submit-button {
+          width: 100%;
+          padding: 0.9rem 1.5rem;
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          border-radius: 8px;
+          color: rgba(255, 255, 255, 0.9);
+          font-size: 0.8rem;
+          font-weight: 500;
+          letter-spacing: 0.02em;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          text-transform: uppercase;
+          font-family: inherit;
+        }
+
+        .contact-form .submit-button:hover {
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08));
+          border-color: rgba(255, 255, 255, 0.3);
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .contact-form .submit-button:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+          transform: none;
+        }
+
+        .contact-form .submit-button:disabled:hover {
+          transform: none;
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+          border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .form-message {
+          padding: 0.8rem 1rem;
+          border-radius: 6px;
+          margin-bottom: 1rem;
+          font-size: 0.8rem;
+          text-align: center;
+          transition: all 0.3s ease;
+        }
+
+        .form-message.success {
+          background: rgba(34, 197, 94, 0.1);
+          border: 1px solid rgba(34, 197, 94, 0.3);
+          color: rgba(34, 197, 94, 0.9);
+        }
+
+        .form-message.error {
+          background: rgba(239, 68, 68, 0.1);
+          border: 1px solid rgba(239, 68, 68, 0.3);
+          color: rgba(239, 68, 68, 0.9);
+        }
+
+        @media (min-width: 640px) {
+          .contact-form {
+            padding: 2rem;
+            max-width: 28rem;
+            width: 80%;
+          }
+
+          .contact-form .form-title {
+            font-size: 1rem;
+          }
+
+          .contact-form label {
+            font-size: 0.8rem;
+          }
+
+          .contact-form input,
+          .contact-form textarea {
+            font-size: 0.85rem;
+            padding: 0.9rem 1.2rem;
+          }
+
+          .contact-form .submit-button {
+            font-size: 0.85rem;
+            padding: 1rem 1.8rem;
+          }
+        }
+
+        @media (min-width: 1024px) {
+          .contact-form {
+            max-width: 32rem;
+            width: 75%;
+          }
         }
       `}</style>
 
@@ -1132,7 +1751,7 @@ export default function AleksPortfolio() {
           <span> through strategic </span><span className="execution">execution</span><span>.</span>
         </div>
 
-        <div className={firstExpandClass} onClick={() => setExpansionLevel(expansionLevel + 1)} />
+        <div className={firstExpandClass} onClick={() => toggleContent(true)} />
 
         <div className={`content-section ${expansionLevel >= 1 ? 'visible' : ''}`}>
           <div className="section-hint">Leadership & Scale</div>
@@ -1141,7 +1760,7 @@ export default function AleksPortfolio() {
           </p>
         </div>
 
-        <div className={`content-section ${expansionLevel >= 2 ? 'visible' : ''}`} onClick={() => setExpansionLevel(3)}>
+        <div className={`content-section ${expansionLevel >= 2 ? 'visible' : ''}`} onClick={() => expansionLevel >= 2 && setExpansionLevel(3)}>
           <div className="section-hint">Current Work</div>
           <p>
           At my current role as a Strategic Program Manager, I align industrial design, mechanical, electrical, firmware, UX, and brand teams around a unified roadmap. I own schedules, budgets, and risk plans for products shipping into medical, robotics, and wearable markets, serving founders fresh off seed rounds as well as multinational enterprises launching next‑gen lines.
@@ -1257,35 +1876,33 @@ export default function AleksPortfolio() {
         </div>
       </div>
 
-      {(contactDiscovered || contactCompressing || contactExpanding) && (
-        <div className={`contact-bar-wrapper${expansionLevel >= 3 ? ' hidden' : ''}`}>
-          <div className={`contact-bar ${!contactExpanded ? 'collapsed' : ''} ${contactCompressing ? 'compressing' : ''} ${contactExpanding ? 'expanding' : ''}`}>
-            <div className={`contact-content ${!contactExpanded ? 'collapsed' : ''}`}>
-              <button 
-                type="button" 
-                className={`email-button ${!contactExpanded ? 'collapsed' : ''}`}
-                onClick={() => window.location.href = 'mailto:aleksandertsatskin@gmail.com'}
+      {contactDiscovered && (expansionLevel < 3) && (
+        <div className={`contact-bar ${!contactExpanded ? 'collapsed' : ''}`}>
+          <div className={`contact-content ${!contactExpanded ? 'collapsed' : ''}`}>
+            <button 
+              type="button" 
+              className={`email-button ${!contactExpanded ? 'collapsed' : ''}`}
+              onClick={() => window.location.href = 'mailto:aleksandertsatskin@gmail.com'}
+            >
+              <svg className="button-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                <polyline points="22,6 12,13 2,6"></polyline>
+              </svg>
+            </button>
+            <div className={`social-divider ${!contactExpanded ? 'collapsed' : ''}`}></div>
+            <div className={`social-links ${!contactExpanded ? 'collapsed' : ''}`}>
+              <button
+                type="button"
+                className="social-icon linkedin-icon"
+                onClick={() => window.open('https://www.linkedin.com/in/aleksander-tsatskin-63167125', '_blank')}
+                title="LinkedIn Profile"
               >
-                <svg className="button-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                  <polyline points="22,6 12,13 2,6"></polyline>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#0077b5" stroke="none">
+                  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                  <rect x="2" y="9" width="4" height="12"></rect>
+                  <circle cx="4" cy="4" r="2"></circle>
                 </svg>
               </button>
-              <div className={`social-divider ${!contactExpanded ? 'collapsed' : ''}`}></div>
-              <div className={`social-links ${!contactExpanded ? 'collapsed' : ''}`}>
-                <button
-                  type="button"
-                  className="social-icon linkedin-icon"
-                  onClick={() => window.open('https://www.linkedin.com/in/aleksander-tsatskin-63167125', '_blank')}
-                  title="LinkedIn Profile"
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="#0077b5" stroke="none">
-                    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
-                    <rect x="2" y="9" width="4" height="12"></rect>
-                    <circle cx="4" cy="4" r="2"></circle>
-                  </svg>
-                </button>
-              </div>
             </div>
           </div>
         </div>
