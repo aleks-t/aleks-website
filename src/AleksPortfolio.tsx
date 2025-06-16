@@ -1707,6 +1707,11 @@ export default function AleksPortfolio() {
         }
 
         .contact-bar.pushed { transform: translateX(-50%) translateY(120%); opacity: 1; visibility: visible; transition: transform 0.8s cubic-bezier(0.23, 1, 0.32, 1); }
+        @media (max-width: 640px) {
+          .contact-bar.pushed {
+            transform: translateX(-50%) translateY(50vh);
+          }
+        }
       `}</style>
 
       <div className="top-gradient" />
