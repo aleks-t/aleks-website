@@ -13,6 +13,8 @@ export default function AleksPortfolio() {
   const [weatherEmoji, setWeatherEmoji] = useState("🔍");
   const [contactExpanded, setContactExpanded] = useState(false);
   const [contactDiscovered, setContactDiscovered] = useState(false);
+  const [contactCompressing, setContactCompressing] = useState(false);
+  const [contactExpanding, setContactExpanding] = useState(false);
   const [formStatus, setFormStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [formMessage, setFormMessage] = useState('');
   
@@ -123,37 +125,41 @@ export default function AleksPortfolio() {
     }
   };
 
-  const toggleContent = (expand: boolean) => {
-    if (expand && expansionLevel < 4) {
-      const newLevel = expansionLevel + 1;
-      setExpansionLevel(newLevel);
-      
-      if (newLevel === 1) {
-        setShowWeatherOnMobile(true);
-        if (window.innerWidth <= 640 && !weatherAnimationStarted) {
-          setWeatherAnimationStarted(true);
-          if (!weatherAnimationCompleted) {
-            fetchWeather();
-          }
+  const handleExpansion = () => {
+    const prevLevel = prevExpansionLevel.current;
+
+    if (expansionLevel >= 0) {
+      setContactDiscovered(true);
+
+      // For level 3, just hide the bar (no compressing animation)
+      if (expansionLevel === 3 && prevLevel === 2) {
+        setContactCompressing(false);
+        setContactExpanded(false);
+        setContactExpanding(false);
+      } else if (expansionLevel < 3) {
+        setContactCompressing(false);
+        // Handle expansion animation when coming back from level 3+ to level 2
+        if (expansionLevel === 2 && prevLevel >= 3 && !contactExpanding) {
+          setContactExpanding(true);
+          setTimeout(() => {
+            setContactExpanding(false);
+          }, 600);
         }
       }
-      
-      // Restart weather animation when reaching contact form on mobile
-      if (newLevel === 4 && window.innerWidth <= 768) {
-        setIsLoading(true);
-        setWeatherAnimationCompleted(false);
-        setLocation("Finding Aleks");
-        setWeatherEmoji("🔍");
-        fetchWeather();
+
+      if (expansionLevel >= 1 && expansionLevel < 3 && !contactCompressing) {
+        setContactExpanded(true);
+      } else {
+        setContactExpanded(false);
       }
-    } else if (!expand && expansionLevel > 0) {
-      const newLevel = expansionLevel - 1;
-      setExpansionLevel(newLevel);
-      
-      if (newLevel === 0) {
-        setShowWeatherOnMobile(false);
-      }
+    } else {
+      setContactDiscovered(false);
+      setContactExpanded(false);
+      setContactCompressing(false);
+      setContactExpanding(false);
     }
+
+    prevExpansionLevel.current = expansionLevel;
   };
 
   const handleWheel = (event: WheelEvent) => {
@@ -170,15 +176,9 @@ export default function AleksPortfolio() {
     lastWheelTime.current = now;
 
     if (isScrollingDown && expansionLevel < 4) {
-      toggleContent(true);
-      if (expansionLevel >= 2) {
-        setContactExpanded(false);
-      }
+      setExpansionLevel(expansionLevel + 1);
     } else if (!isScrollingDown && expansionLevel > 0) {
-      toggleContent(false);
-      if (expansionLevel >= 2) {
-        setContactExpanded(true);
-      }
+      setExpansionLevel(expansionLevel - 1);
     } else {
       isAnimating.current = false;
       return;
@@ -217,9 +217,9 @@ export default function AleksPortfolio() {
     lastTouchTime.current = now;
 
     if (isSwipingUp && expansionLevel < 4) {
-      toggleContent(true);
+      setExpansionLevel(expansionLevel + 1);
     } else if (!isSwipingUp && expansionLevel > 0) {
-      toggleContent(false);
+      setExpansionLevel(expansionLevel - 1);
     } else {
       isAnimating.current = false;
       return;
@@ -316,22 +316,12 @@ export default function AleksPortfolio() {
       e.preventDefault();
     };
     document.addEventListener('touchmove', preventDefaultTouch, { passive: false });
+    handleExpansion();
     return () => {
       window.removeEventListener('wheel', handleWheelEvent);
       document.removeEventListener('touchmove', preventDefaultTouch);
       clearInterval(timeInterval);
     };
-  }, [expansionLevel]);
-
-  useEffect(() => {
-    // Show bar for levels 0-2, hide for 3+
-    if (expansionLevel < 3) {
-      setContactDiscovered(true);
-      setContactExpanded(expansionLevel > 0); // expanded for 1,2; collapsed for 0
-    } else {
-      setContactDiscovered(false);
-      setContactExpanded(false);
-    }
   }, [expansionLevel]);
 
   const mainContentClass = `main-content ${expansionLevel > 0 ? `expanded-${expansionLevel}` : ''}`;
@@ -1119,42 +1109,17 @@ export default function AleksPortfolio() {
           transform: translateX(0) !important;
         }
 
-        .contact-bar {
-          position: fixed;
-          bottom: var(--safe-area-bottom);
-          left: 50%;
-          transform: translateX(-50%) translateY(100%);
+        .contact-bar,
+        .contact-bar.collapsed,
+        .contact-bar.pushed,
+        .contact-bar.compressing,
+        .contact-bar.expanding {
+          left: 50% !important;
+          transform: translateX(-50%) !important;
+          margin-left: 0 !important;
+          right: auto !important;
           width: auto;
           max-width: 20rem;
-          min-width: 3rem;
-          height: 3rem;
-          background: rgba(20, 20, 20, 0.8);
-          border: 1px solid rgba(255, 255, 255, 0.15);
-          border-radius: 1.5rem;
-          backdrop-filter: blur(12px);
-          z-index: 100;
-          opacity: 0;
-          visibility: hidden;
-          transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .contact-bar:not(.collapsed) {
-          transform: translateX(-50%) translateY(0);
-          opacity: 1;
-          visibility: visible;
-        }
-
-        .contact-bar.collapsed {
-          transform: translateX(-50%) translateY(0);
-          opacity: 1;
-          visibility: visible;
-          padding: 0.2rem;
-          width: 3rem;
-          height: 2.8rem;
           min-width: 3rem;
         }
 
@@ -1715,6 +1680,8 @@ export default function AleksPortfolio() {
             width: 75%;
           }
         }
+
+        .contact-bar.pushed { transform: translateX(-50%) translateY(200%); opacity: 1; visibility: visible; transition: transform 0.8s cubic-bezier(0.23, 1, 0.32, 1); }
       `}</style>
 
       <div className="top-gradient" />
@@ -1734,7 +1701,7 @@ export default function AleksPortfolio() {
           <span> through strategic </span><span className="execution">execution</span><span>.</span>
         </div>
 
-        <div className={firstExpandClass} onClick={() => toggleContent(true)} />
+        <div className={firstExpandClass} onClick={() => setExpansionLevel(expansionLevel + 1)} />
 
         <div className={`content-section ${expansionLevel >= 1 ? 'visible' : ''}`}>
           <div className="section-hint">Leadership & Scale</div>
@@ -1743,7 +1710,7 @@ export default function AleksPortfolio() {
           </p>
         </div>
 
-        <div className={`content-section ${expansionLevel >= 2 ? 'visible' : ''}`} onClick={() => expansionLevel >= 2 && setExpansionLevel(3)}>
+        <div className={`content-section ${expansionLevel >= 2 ? 'visible' : ''}`} onClick={() => setExpansionLevel(3)}>
           <div className="section-hint">Current Work</div>
           <p>
           At my current role as a Strategic Program Manager, I align industrial design, mechanical, electrical, firmware, UX, and brand teams around a unified roadmap. I own schedules, budgets, and risk plans for products shipping into medical, robotics, and wearable markets, serving founders fresh off seed rounds as well as multinational enterprises launching next‑gen lines.
@@ -1859,12 +1826,12 @@ export default function AleksPortfolio() {
         </div>
       </div>
 
-      {contactDiscovered && (
-        <div className={`contact-bar${!contactExpanded ? ' collapsed' : ''}`}>
-          <div className={`contact-content${!contactExpanded ? ' collapsed' : ''}`}>
+      {(contactDiscovered || contactCompressing || contactExpanding) && (
+        <div className={`contact-bar ${!contactExpanded ? 'collapsed' : ''} ${contactCompressing ? 'compressing' : ''} ${contactExpanding ? 'expanding' : ''} ${expansionLevel >= 3 ? 'pushed' : ''}`}>
+          <div className={`contact-content ${!contactExpanded ? 'collapsed' : ''}`}>
             <button 
               type="button" 
-              className={`email-button${!contactExpanded ? ' collapsed' : ''}`}
+              className={`email-button ${!contactExpanded ? 'collapsed' : ''}`}
               onClick={() => window.location.href = 'mailto:aleksandertsatskin@gmail.com'}
             >
               <svg className="button-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -1872,8 +1839,8 @@ export default function AleksPortfolio() {
                 <polyline points="22,6 12,13 2,6"></polyline>
               </svg>
             </button>
-            <div className={`social-divider${!contactExpanded ? ' collapsed' : ''}`}></div>
-            <div className={`social-links${!contactExpanded ? ' collapsed' : ''}`}>
+            <div className={`social-divider ${!contactExpanded ? 'collapsed' : ''}`}></div>
+            <div className={`social-links ${!contactExpanded ? 'collapsed' : ''}`}>
               <button
                 type="button"
                 className="social-icon linkedin-icon"
