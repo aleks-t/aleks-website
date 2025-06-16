@@ -1331,24 +1331,20 @@ export default function AleksPortfolio() {
             left: 0;
             right: 0;
             margin: 0 auto;
+            bottom: 1.5rem;
             display: flex;
             justify-content: center;
-            width: auto;
-            max-width: 90vw;
+            z-index: 999;
             border-radius: 1.5rem;
             padding: 0.6rem 1.2rem;
-            z-index: 999;
-            transition: bottom 0.7s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            width: auto;
+            max-width: 90vw;
           }
           .contact-bar.pushed {
-            bottom: -100px;
-            opacity: 0;
-            pointer-events: none;
+            display: none !important;
           }
           .contact-bar:not(.pushed) {
-            bottom: 1.5rem;
-            opacity: 1;
-            pointer-events: auto;
+            display: flex;
           }
         }
 
