@@ -1327,21 +1327,25 @@ export default function AleksPortfolio() {
         @media (max-width: 640px) {
           .contact-bar,
           .contact-bar.pushed {
-            left: 50%;
-            right: auto;
-            margin: 0;
+            left: 0;
+            right: 0;
+            margin-left: auto;
+            margin-right: auto;
             max-width: 90vw;
-            width: auto;
+            width: 100%;
             box-sizing: border-box;
+            position: fixed;
+            bottom: 1.5rem;
             transform-origin: center;
           }
           .contact-bar.pushed {
-            transform: translate(-50%, 50vh);
+            transform: translateY(50vh);
             opacity: 0;
             pointer-events: none;
             transition: transform 0.8s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.5s cubic-bezier(0.23, 1, 0.32, 1);
           }
           .contact-bar:not(.pushed) {
+            transform: translateY(0);
             opacity: 1;
             pointer-events: auto;
             transition: transform 0.8s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.5s cubic-bezier(0.23, 1, 0.32, 1);
