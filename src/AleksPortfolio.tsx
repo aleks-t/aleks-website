@@ -1327,7 +1327,8 @@ export default function AleksPortfolio() {
         @media (max-width: 640px) {
           .contact-bar,
           .contact-bar.pushed {
-            width: 220px;
+            display: inline-flex;
+            width: auto;
             max-width: 90vw;
             left: 50%;
             right: auto;
@@ -1336,6 +1337,7 @@ export default function AleksPortfolio() {
             bottom: 1.5rem;
             border-radius: 1.5rem;
             padding: 0.6rem 1.2rem;
+            z-index: 999;
           }
           .contact-bar.pushed {
             transform: translateX(-50%) translateY(120%);
