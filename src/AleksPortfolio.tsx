@@ -1109,52 +1109,43 @@ export default function AleksPortfolio() {
           transform: translateX(0) !important;
         }
 
-        .contact-bar,
-        .contact-bar.collapsed,
-        .contact-bar.compressing,
-        .contact-bar.expanding {
+        .contact-bar {
           position: fixed;
+          bottom: var(--safe-area-bottom);
           left: 50%;
-          right: auto;
-          margin: 0;
-          transform: translate(-50%, 0);
+          transform: translateX(-50%) translateY(100%);
           width: auto;
           max-width: 20rem;
           min-width: 3rem;
-          z-index: 1000;
-          opacity: 1;
+          height: 3rem;
           background: rgba(20, 20, 20, 0.8);
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          border-radius: 1.5rem;
+          backdrop-filter: blur(12px);
+          z-index: 100;
+          opacity: 0;
+          visibility: hidden;
+          transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
-        .contact-bar.pushed {
-          position: fixed;
-          left: 50%;
-          right: auto;
-          margin: 0;
-          transform: translate(-50%, 100vh);
+
+        .contact-bar:not(.collapsed) {
+          transform: translateX(-50%) translateY(0);
           opacity: 1;
-          background: rgba(20, 20, 20, 0.8);
+          visibility: visible;
         }
-        @media (max-width: 640px) {
-          .contact-bar,
-          .contact-bar.collapsed,
-          .contact-bar.compressing,
-          .contact-bar.expanding,
-          .contact-bar.pushed {
-            min-width: 200px;
-            max-width: 90vw;
-            width: auto;
-            left: 50%;
-            right: auto;
-            margin: 0;
-            padding-left: 0;
-            padding-right: 0;
-            z-index: 1000;
-            opacity: 1;
-            background: rgba(20, 20, 20, 0.8);
-          }
-          .contact-bar.pushed {
-            transform: translate(-50%, 100vh);
-          }
+
+        .contact-bar.collapsed {
+          transform: translateX(-50%) translateY(0);
+          opacity: 1;
+          visibility: visible;
+          padding: 0.2rem;
+          width: 3rem;
+          height: 2.8rem;
+          min-width: 3rem;
         }
 
         .email-button::before {
@@ -1714,6 +1705,8 @@ export default function AleksPortfolio() {
             width: 75%;
           }
         }
+
+        .contact-bar.pushed { transform: translateX(-50%) translateY(120%); opacity: 1; visibility: visible; transition: transform 0.8s cubic-bezier(0.23, 1, 0.32, 1); }
       `}</style>
 
       <div className="top-gradient" />
