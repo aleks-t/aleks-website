@@ -1327,29 +1327,28 @@ export default function AleksPortfolio() {
         @media (max-width: 640px) {
           .contact-bar,
           .contact-bar.pushed {
-            display: inline-flex;
+            position: fixed;
+            left: 0;
+            right: 0;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
             width: auto;
             max-width: 90vw;
-            left: 50%;
-            right: auto;
-            transform-origin: center;
-            position: fixed;
-            bottom: 1.5rem;
             border-radius: 1.5rem;
             padding: 0.6rem 1.2rem;
             z-index: 999;
+            transition: bottom 0.7s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.5s cubic-bezier(0.23, 1, 0.32, 1);
           }
           .contact-bar.pushed {
-            transform: translateX(-50%) translateY(120%);
+            bottom: -100px;
             opacity: 0;
             pointer-events: none;
-            transition: transform 0.8s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.5s cubic-bezier(0.23, 1, 0.32, 1);
           }
           .contact-bar:not(.pushed) {
-            transform: translateX(-50%) translateY(0);
+            bottom: 1.5rem;
             opacity: 1;
             pointer-events: auto;
-            transition: transform 0.8s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.5s cubic-bezier(0.23, 1, 0.32, 1);
           }
         }
 
