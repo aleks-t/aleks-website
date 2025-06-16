@@ -1325,40 +1325,26 @@ export default function AleksPortfolio() {
         }
 
         @media (max-width: 640px) {
-          .contact-bar {
-            bottom: 1.5rem;
-            padding: 0.6rem 1.2rem;
-            height: 3.2rem;
+          .contact-bar,
+          .contact-bar.pushed {
+            left: 50%;
+            right: auto;
+            margin: 0;
+            max-width: 90vw;
+            width: auto;
+            box-sizing: border-box;
+            transform-origin: center;
           }
-
-          .contact-bar.collapsed {
-            padding: 0.4rem;
-            width: 3.6rem;
-            height: 2.8rem;
-            min-width: 3.6rem;
+          .contact-bar.pushed {
+            transform: translate(-50%, 50vh);
+            opacity: 0;
+            pointer-events: none;
+            transition: transform 0.8s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.5s cubic-bezier(0.23, 1, 0.32, 1);
           }
-
-          .email-button {
-            padding: 0.65rem;
-            width: 2.6rem;
-            height: 2.4rem;
-          }
-
-          .email-button.collapsed {
-            padding: 0.65rem;
-            width: 2.6rem;
-            height: 2.4rem;
-          }
-
-          .social-icon {
-            padding: 0.65rem;
-            width: 2.6rem;
-            height: 2.4rem;
-          }
-
-          .button-icon, .social-icon svg {
-            width: 20px;
-            height: 20px;
+          .contact-bar:not(.pushed) {
+            opacity: 1;
+            pointer-events: auto;
+            transition: transform 0.8s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.5s cubic-bezier(0.23, 1, 0.32, 1);
           }
         }
 
@@ -1707,11 +1693,6 @@ export default function AleksPortfolio() {
         }
 
         .contact-bar.pushed { transform: translateX(-50%) translateY(120%); opacity: 1; visibility: visible; transition: transform 0.8s cubic-bezier(0.23, 1, 0.32, 1); }
-        @media (max-width: 640px) {
-          .contact-bar.pushed {
-            transform: translateX(-50%) translateY(50vh);
-          }
-        }
       `}</style>
 
       <div className="top-gradient" />
