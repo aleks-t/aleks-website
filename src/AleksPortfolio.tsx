@@ -1121,14 +1121,18 @@ export default function AleksPortfolio() {
           width: auto;
           max-width: 20rem;
           min-width: 3rem;
-          z-index: 100;
+          z-index: 1000;
+          opacity: 1;
+          background: rgba(20, 20, 20, 0.8);
         }
         .contact-bar.pushed {
           position: fixed;
           left: 50%;
           right: auto;
           margin: 0;
-          transform: translate(-50%, 200%);
+          transform: translate(-50%, 100vh);
+          opacity: 1;
+          background: rgba(20, 20, 20, 0.8);
         }
         @media (max-width: 640px) {
           .contact-bar,
@@ -1144,10 +1148,12 @@ export default function AleksPortfolio() {
             margin: 0;
             padding-left: 0;
             padding-right: 0;
-            transform: translate(-50%, 0);
+            z-index: 1000;
+            opacity: 1;
+            background: rgba(20, 20, 20, 0.8);
           }
           .contact-bar.pushed {
-            transform: translate(-50%, 200%);
+            transform: translate(-50%, 100vh);
           }
         }
 
