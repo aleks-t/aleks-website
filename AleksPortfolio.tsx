@@ -1111,16 +1111,19 @@ export default function AleksPortfolio() {
 
         .contact-bar,
         .contact-bar.collapsed,
-        .contact-bar.pushed,
         .contact-bar.compressing,
         .contact-bar.expanding {
-          left: 50% !important;
-          transform: translateX(-50%) !important;
-          margin-left: 0 !important;
-          right: auto !important;
+          left: 50%;
+          transform: translateX(-50%);
+          margin-left: 0;
+          right: auto;
           width: auto;
           max-width: 20rem;
           min-width: 3rem;
+        }
+        .contact-bar.pushed {
+          left: 50%;
+          transform: translateX(-50%) translateY(200%);
         }
 
         .email-button::before {
@@ -1680,8 +1683,6 @@ export default function AleksPortfolio() {
             width: 75%;
           }
         }
-
-        .contact-bar.pushed { transform: translateX(-50%) translateY(200%); opacity: 1; visibility: visible; transition: transform 0.8s cubic-bezier(0.23, 1, 0.32, 1); }
       `}</style>
 
       <div className="top-gradient" />
