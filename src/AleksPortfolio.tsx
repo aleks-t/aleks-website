@@ -72,7 +72,7 @@ export default function AleksPortfolio() {
     },
     {
       year: '2025',
-      description: 'Strategic Program Manager at Card79. Currently managing innovation projects for clients ranging from established brands to emerging companies, with a focus on scope clarity, risk mitigation, and delivery excellence.'
+      description: 'Strategic Program Manager at Card79. Currently managing projects for clients ranging from established brands to emerging companies, with a focus on scope clarity, risk mitigation, and delivery excellence.'
     }
   ];
 
